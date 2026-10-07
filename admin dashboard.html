@@ -1214,7 +1214,7 @@
 
                             <div>
                                 <label class="form-label">Studio Address</label>
-                                <input type="text" id="set-address" class="form-input" value="124 Styling Ave, Salem, Tamil Nadu 636001">
+                                <input type="text" id="set-address" class="form-input" value="MMR Complex, Periyakollappatty, Chinna Thirupathi, Salem, Tamil Nadu 636008">
                             </div>
 
                             <div class="grid grid-cols-2 gap-4">
@@ -1815,7 +1815,9 @@
             `;
             tbody.prepend(tr);
             closeAddBookingModal();
-            alert('Appointment confirmed for ' + guest + ' with ' + artisan + ' at ' + station + '!');
+            if (typeof window.showSuccessModal === 'function') {
+                window.showSuccessModal('Appointment Confirmed', 'Appointment confirmed for ' + guest + ' with ' + artisan + ' at ' + station + '!');
+            }
         }
 
         function filterBookings(status, btn) {
@@ -1885,8 +1887,21 @@
         }
 
         function deleteProductRow(btn) {
-            if (confirm('Are you sure you wish to archive this treatment from the live menu?')) {
-                btn.closest('tr').remove();
+            const tr = btn.closest('tr');
+            if (typeof window.showConfirmModal === 'function') {
+                window.showConfirmModal(
+                    'Archive Treatment',
+                    'Are you sure you wish to archive this treatment from the live menu?',
+                    () => {
+                        if (tr) tr.remove();
+                        if (typeof window.showToast === 'function') window.showToast('Treatment archived successfully');
+                    },
+                    null,
+                    'Archive',
+                    'Cancel'
+                );
+            } else if (tr) {
+                tr.remove();
             }
         }
 
@@ -1896,7 +1911,18 @@
 
         function confirmAdminLogout(e) {
             if (e) e.preventDefault();
-            if (confirm('Sign out of the Stackly Studio Central Management Portal?')) {
+            if (typeof window.showConfirmModal === 'function') {
+                window.showConfirmModal(
+                    'Confirm Sign Out',
+                    'Sign out of the Stackly Studio Central Management Portal?',
+                    () => {
+                        window.location.href = 'login.html';
+                    },
+                    null,
+                    'Sign Out',
+                    'Stay Signed In'
+                );
+            } else {
                 window.location.href = 'login.html';
             }
         }

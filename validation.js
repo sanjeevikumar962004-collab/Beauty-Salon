@@ -154,6 +154,36 @@ document.addEventListener("DOMContentLoaded", () => {
             margin-bottom: 1.75rem;
         }
 
+        .success-actions-wrap {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+
+        .success-cancel-btn {
+            background: transparent;
+            color: #4f5945;
+            border: 1.5px solid rgba(79, 89, 69, 0.4);
+            padding: 0.85rem 1.8rem;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex: 1;
+        }
+
+        .success-cancel-btn:hover {
+            background: rgba(79, 89, 69, 0.08);
+            border-color: #4f5945;
+        }
+
         .success-close-btn {
             background: #4f5945;
             color: #f4f3ed;
@@ -167,7 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
             border-radius: 9999px;
             cursor: pointer;
             transition: all 0.2s ease;
-            width: 100%;
+            flex: 1;
         }
 
         .success-close-btn:hover {
@@ -216,51 +246,173 @@ document.addEventListener("DOMContentLoaded", () => {
     document.head.appendChild(style);
 
     // 2. Build Modal Overlay elements dynamically in DOM
-    const genericOverlay = document.createElement("div");
-    genericOverlay.className = "success-overlay";
-    genericOverlay.id = "stackly-success-overlay";
-    genericOverlay.innerHTML = `
-        <div class="success-card">
-            <div class="success-icon-wrap">
+    function ensureModalDOM() {
+        let genericOverlay = document.getElementById("stackly-success-overlay");
+        if (!genericOverlay) {
+            genericOverlay = document.createElement("div");
+            genericOverlay.className = "success-overlay";
+            genericOverlay.id = "stackly-success-overlay";
+            genericOverlay.innerHTML = `
+                <div class="success-card">
+                    <div class="success-icon-wrap" id="overlay-icon-wrap">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    </div>
+                    <h3 id="overlay-title">Action Successful</h3>
+                    <p id="overlay-message">Your consultation details have been recorded.</p>
+                    <div class="success-actions-wrap" id="overlay-actions">
+                        <button class="success-cancel-btn" id="overlay-cancel-btn" style="display: none;">Cancel</button>
+                        <button class="success-close-btn" id="overlay-close-btn">Continue</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(genericOverlay);
+
+            const closeBtn = document.getElementById("overlay-close-btn");
+            const cancelBtn = document.getElementById("overlay-cancel-btn");
+
+            if (closeBtn) {
+                closeBtn.addEventListener("click", () => {
+                    genericOverlay.classList.remove("is-active");
+                    document.body.style.overflow = "";
+                    if (typeof genericOverlay.onConfirmCb === "function") {
+                        const cb = genericOverlay.onConfirmCb;
+                        genericOverlay.onConfirmCb = null;
+                        cb();
+                    }
+                    const redirectUrl = genericOverlay.dataset.redirect;
+                    if (redirectUrl) {
+                        window.location.href = redirectUrl;
+                    }
+                });
+            }
+
+            if (cancelBtn) {
+                cancelBtn.addEventListener("click", () => {
+                    genericOverlay.classList.remove("is-active");
+                    document.body.style.overflow = "";
+                    if (typeof genericOverlay.onCancelCb === "function") {
+                        const cb = genericOverlay.onCancelCb;
+                        genericOverlay.onCancelCb = null;
+                        cb();
+                    }
+                });
+            }
+
+            // Close when clicking overlay backdrop
+            genericOverlay.addEventListener("click", (e) => {
+                if (e.target === genericOverlay) {
+                    genericOverlay.classList.remove("is-active");
+                    document.body.style.overflow = "";
+                    if (typeof genericOverlay.onCancelCb === "function") {
+                        const cb = genericOverlay.onCancelCb;
+                        genericOverlay.onCancelCb = null;
+                        cb();
+                    }
+                }
+            });
+
+            // Close on Escape key
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "Escape" && genericOverlay.classList.contains("is-active")) {
+                    genericOverlay.classList.remove("is-active");
+                    document.body.style.overflow = "";
+                    if (typeof genericOverlay.onCancelCb === "function") {
+                        const cb = genericOverlay.onCancelCb;
+                        genericOverlay.onCancelCb = null;
+                        cb();
+                    }
+                }
+            });
+        }
+        return genericOverlay;
+    }
+
+    ensureModalDOM();
+
+    // Expose Global Theme Modal Functions on window
+    window.showSuccessModal = (title, message, redirectUrl = null, btnText = "Continue") => {
+        const overlay = ensureModalDOM();
+        const titleEl = document.getElementById("overlay-title");
+        const msgEl = document.getElementById("overlay-message");
+        const closeBtn = document.getElementById("overlay-close-btn");
+        const cancelBtn = document.getElementById("overlay-cancel-btn");
+        const iconWrap = document.getElementById("overlay-icon-wrap");
+
+        if (titleEl) titleEl.textContent = title || "Notification";
+        if (msgEl) msgEl.textContent = message || "";
+        if (closeBtn) closeBtn.textContent = btnText || "Continue";
+        if (cancelBtn) cancelBtn.style.display = "none";
+
+        if (iconWrap) {
+            iconWrap.style.background = "rgba(79, 89, 69, 0.12)";
+            iconWrap.style.color = "#4f5945";
+            iconWrap.innerHTML = `
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
-            </div>
-            <h3 id="overlay-title">Action Successful</h3>
-            <p id="overlay-message">Your consultation details have been recorded.</p>
-            <button class="success-close-btn" id="overlay-close-btn">Continue</button>
-        </div>
-    `;
-    document.body.appendChild(genericOverlay);
+            `;
+        }
 
-    const closeBtn = document.getElementById("overlay-close-btn");
-    if (closeBtn) {
-        closeBtn.addEventListener("click", () => {
-            genericOverlay.classList.remove("is-active");
-            document.body.style.overflow = "";
-            const redirectUrl = genericOverlay.dataset.redirect;
-            if (redirectUrl) {
-                window.location.href = redirectUrl;
-            }
-        });
-    }
-
-    // Function to show success modal
-    const showSuccessModal = (title, message, redirectUrl = null) => {
-        document.getElementById("overlay-title").textContent = title;
-        document.getElementById("overlay-message").textContent = message;
-        genericOverlay.dataset.redirect = redirectUrl || "";
-        genericOverlay.classList.add("is-active");
+        overlay.dataset.redirect = redirectUrl || "";
+        overlay.onConfirmCb = null;
+        overlay.onCancelCb = null;
+        overlay.classList.add("is-active");
         document.body.style.overflow = "hidden";
     };
 
-    // Override global alert to use custom popup
-    window.alert = function(message) {
-        showSuccessModal("Notification", message);
+    window.showConfirmModal = (title, message, onConfirm, onCancel, confirmText = "Confirm", cancelText = "Cancel") => {
+        const overlay = ensureModalDOM();
+        const titleEl = document.getElementById("overlay-title");
+        const msgEl = document.getElementById("overlay-message");
+        const closeBtn = document.getElementById("overlay-close-btn");
+        const cancelBtn = document.getElementById("overlay-cancel-btn");
+        const iconWrap = document.getElementById("overlay-icon-wrap");
+
+        if (titleEl) titleEl.textContent = title || "Confirm Action";
+        if (msgEl) msgEl.textContent = message || "";
+        if (closeBtn) closeBtn.textContent = confirmText || "Confirm";
+        if (cancelBtn) {
+            cancelBtn.textContent = cancelText || "Cancel";
+            cancelBtn.style.display = "block";
+        }
+
+        if (iconWrap) {
+            iconWrap.style.background = "rgba(180, 140, 60, 0.15)";
+            iconWrap.style.color = "#8f7024";
+            iconWrap.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:34px;height:34px;">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+            `;
+        }
+
+        overlay.dataset.redirect = "";
+        overlay.onConfirmCb = typeof onConfirm === "function" ? onConfirm : null;
+        overlay.onCancelCb = typeof onCancel === "function" ? onCancel : null;
+        overlay.classList.add("is-active");
+        document.body.style.overflow = "hidden";
+    };
+
+    // Global alias
+    window.showThemeModal = window.showSuccessModal;
+
+    // Override global alert to always use theme built popup across the entire website
+    window.alert = function(message, title = "Stackly Aesthetics") {
+        window.showSuccessModal(title, message);
+    };
+
+    // Override global confirm to prevent native google/browser dialogs
+    window.confirm = function(message) {
+        window.showSuccessModal("Notice", message);
+        return false;
     };
 
     // Function to show toast
-    const showToast = (message) => {
+    window.showToast = (message) => {
         let toast = document.getElementById("stackly-toast");
         if (!toast) {
             toast = document.createElement("div");
@@ -812,9 +964,16 @@ document.addEventListener("DOMContentLoaded", () => {
             const href = linkEl.getAttribute("href");
             const onclickStr = linkEl.getAttribute("onclick") || "";
 
+            // Intercept mail links and redirect to 404.html instead of opening mail client or outlook
+            if (href && (href.startsWith("mailto:") || href.includes("@") || linkEl.id === "header-email" || linkEl.textContent.includes("@"))) {
+                e.preventDefault();
+                window.location.href = "404.html";
+                return;
+            }
+
             // Check for valid page navigation
             if (href && !onclickStr) {
-                if (href.startsWith("mailto:") || href.startsWith("tel:")) {
+                if (href.startsWith("tel:")) {
                     return;
                 }
 

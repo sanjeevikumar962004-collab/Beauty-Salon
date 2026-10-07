@@ -981,7 +981,18 @@
 
         function confirmSignOut(e) {
             if (e) e.preventDefault();
-            if (confirm('Sign out of your Stackly Atelier client portal?')) {
+            if (typeof window.showConfirmModal === 'function') {
+                window.showConfirmModal(
+                    'Confirm Sign Out',
+                    'Sign out of your Stackly Atelier client portal?',
+                    () => {
+                        window.location.href = 'login.html';
+                    },
+                    null,
+                    'Sign Out',
+                    'Stay Signed In'
+                );
+            } else {
                 window.location.href = 'login.html';
             }
         }
