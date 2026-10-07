@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In | Stackly Aesthetics & Hair Studio</title>
+    <meta name="description" content="Sign in to your Stackly Aesthetics account to manage appointments, review bespoke color formulations, and access client concierge privileges.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif']
+                    },
+                    colors: {
+                        brand: {
+                            light: '#f4f3ed', // Soft off-white
+                            green: '#4f5945', // Deep olive green
+                            dark: '#141414',  // Near black
+                            accent: '#a3a99e', // Soft sage
+                            muted: '#7a7a7a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #141414;
+            color: #f4f3ed;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+        }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #141414; }
+        ::-webkit-scrollbar-thumb { background: #4f5945; border-radius: 10px; }
+
+        /* Split Layout */
+        .auth-left {
+            background: #141414;
+            position: relative;
+            overflow: hidden;
+        }
+        .auth-left-image {
+            position: absolute;
+            inset: 0;
+            background-image: url('images/salon_interior_luxury.webp');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.38;
+            transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .auth-left:hover .auth-left-image {
+            opacity: 0.48;
+            transform: scale(1.03);
+        }
+        .auth-left-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(20,20,20,0.88) 0%, rgba(79,89,69,0.45) 50%, rgba(20,20,20,0.92) 100%);
+        }
+
+        /* Auth Form Inputs */
+        .auth-input {
+            background: #1d1d1d;
+            border: 1px solid rgba(244, 243, 237, 0.12);
+            color: #f4f3ed;
+            transition: all 0.3s ease;
+            width: 100%;
+            padding: 0.9rem 1rem 0.9rem 2.75rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            outline: none;
+        }
+        .auth-input::placeholder { color: #6b7280; }
+        .auth-input:focus {
+            border-color: #4f5945;
+            background: #242424;
+            box-shadow: 0 0 0 3px rgba(79, 89, 69, 0.25);
+        }
+        .auth-input.input-error {
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+        }
+        .auth-input.input-success {
+            border-color: #4f5945 !important;
+            box-shadow: 0 0 0 3px rgba(79, 89, 69, 0.2) !important;
+        }
+
+        /* Role Switcher */
+        .role-switcher {
+            background: #1d1d1d;
+            border: 1px solid rgba(244, 243, 237, 0.1);
+            border-radius: 9999px;
+            padding: 4px;
+            display: flex;
+            position: relative;
+        }
+        .role-pill {
+            position: absolute;
+            top: 4px;
+            bottom: 4px;
+            background: #4f5945;
+            border-radius: 9999px;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .role-btn {
+            flex: 1;
+            padding: 0.65rem 1rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #9ca3af;
+            z-index: 2;
+            position: relative;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            transition: color 0.3s;
+        }
+        .role-btn.active { color: #f4f3ed; }
+
+        /* Submit Button */
+        .btn-submit {
+            width: 100%;
+            padding: 0.95rem 2rem;
+            background: #4f5945;
+            color: #f4f3ed;
+            font-weight: 600;
+            font-size: 0.8rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            border: none;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+        }
+        .btn-submit:hover {
+            background: #3e4636;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(79, 89, 69, 0.35);
+        }
+        .btn-submit:active { transform: translateY(0); }
+
+        /* Alerts */
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+            font-size: 0.82rem;
+            color: #fca5a5;
+        }
+        .alert-success {
+            background: rgba(79, 89, 69, 0.2);
+            border: 1px solid rgba(79, 89, 69, 0.4);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+            font-size: 0.82rem;
+            color: #d1fae5;
+        }
+
+        .error-text {
+            font-size: 0.72rem;
+            color: #ef4444;
+            margin-top: 0.35rem;
+            margin-left: 0.25rem;
+            display: none;
+        }
+        .error-text.show { display: block; }
+
+        .nav-link {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: rgba(244, 243, 237, 0.6);
+            transition: color 0.25s;
+        }
+        .nav-link:hover { color: #f4f3ed; }
+
+        .spinner {
+            width: 16px; height: 16px;
+            border: 2px solid rgba(244, 243, 237, 0.3);
+            border-top-color: #f4f3ed;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            display: none;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Floating shimmer particles */
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(163, 169, 158, 0.4);
+            border-radius: 50%;
+            animation: particleFloat 9s infinite ease-in-out;
+        }
+        @keyframes particleFloat {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+            20% { opacity: 0.8; }
+            80% { opacity: 0.4; }
+            100% { transform: translateY(-130px) translateX(25px); opacity: 0; }
+        }
+
+        /* Fade-in animation */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-up {
+            animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+    </style>
+</head>
+<body>
+
+    <!-- Full-screen split layout -->
+    <div class="flex min-h-screen">
+
+        <!-- Left: Cinematic Salon Panel (hidden on mobile) -->
+        <div class="hidden lg:flex lg:w-1/2 auth-left flex-col justify-between p-12 xl:p-16 relative">
+            <div class="auth-left-image"></div>
+            <div class="auth-left-overlay"></div>
+
+            <!-- Floating luxury particles -->
+            <div class="particle" style="left:15%;bottom:15%;animation-delay:0s;"></div>
+            <div class="particle" style="left:45%;bottom:25%;animation-delay:1.5s;"></div>
+            <div class="particle" style="left:65%;bottom:10%;animation-delay:3s;"></div>
+            <div class="particle" style="left:80%;bottom:35%;animation-delay:0.8s;"></div>
+            <div class="particle" style="left:30%;bottom:45%;animation-delay:2s;"></div>
+
+            <!-- Brand Logo Top -->
+            <div class="relative z-10 flex items-center gap-3">
+                <a href="index.html" class="inline-block hover:opacity-80 transition-opacity" title="Stackly Home">
+                    <img src="images/stackly logo.webp" alt="Stackly Aesthetics" class="h-10 sm:h-12 w-auto object-contain">
+                </a>
+            </div>
+
+            <!-- Center Editorial Content -->
+            <div class="relative z-10 my-auto py-10">
+                <div class="inline-flex items-center gap-2 border border-brand-accent/30 bg-black/30 backdrop-blur-md px-3.5 py-1.5 rounded-full text-brand-accent text-[10px] uppercase tracking-[0.25em] font-semibold mb-6">
+                    <i class="ph-fill ph-scissors"></i> Bespoke Hair Artistry
+                </div>
+                
+                <h1 class="font-serif text-4xl xl:text-5xl leading-[1.15] text-brand-light mb-6">
+                    Where Architectural Form <br>
+                    <span class="italic text-brand-accent font-light">Meets Cellular Wellness</span>
+                </h1>
+                
+                <p class="text-sm text-brand-light/70 leading-relaxed max-w-md font-light mb-8">
+                    "Elegance is not about being noticed; it is about being remembered. Welcome back to your personal sanctuary for refined style in Salem."
+                </p>
+
+                <!-- Privilege Highlights -->
+                <div class="space-y-3.5 max-w-sm border-t border-brand-light/10 pt-6">
+                    <div class="flex items-center gap-3 text-xs text-brand-light/80">
+                        <i class="ph-fill ph-check-circle text-brand-accent text-base"></i>
+                        <span>Bespoke color formulation & diagnostic history</span>
+                    </div>
+                    <div class="flex items-center gap-3 text-xs text-brand-light/80">
+                        <i class="ph-fill ph-check-circle text-brand-accent text-base"></i>
+                        <span>Priority chair booking with master artisans</span>
+                    </div>
+                    <div class="flex items-center gap-3 text-xs text-brand-light/80">
+                        <i class="ph-fill ph-check-circle text-brand-accent text-base"></i>
+                        <span>Atelier VIP points & seasonal complimentary rituals</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Salon Stats Bottom -->
+            <div class="relative z-10 grid grid-cols-3 gap-6 border-t border-brand-light/15 pt-8">
+                <div>
+                    <div class="font-serif text-3xl text-brand-light">12k+</div>
+                    <div class="text-[10px] uppercase tracking-[0.2em] text-brand-accent mt-1">Signature Cuts</div>
+                </div>
+                <div>
+                    <div class="font-serif text-3xl text-brand-light">100%</div>
+                    <div class="text-[10px] uppercase tracking-[0.2em] text-brand-accent mt-1">Clean Formulas</div>
+                </div>
+                <div>
+                    <div class="font-serif text-3xl text-brand-light">4.9★</div>
+                    <div class="text-[10px] uppercase tracking-[0.2em] text-brand-accent mt-1">Guest Rating</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Auth Form -->
+        <div class="w-full lg:w-1/2 flex flex-col min-h-screen bg-[#141414]">
+
+            <!-- Top Navigation -->
+            <header class="sticky top-0 bg-[#141414]/90 backdrop-blur-md z-30 flex justify-between items-center px-4 sm:px-6 md:px-12 py-4 sm:py-5 border-b border-brand-light/10">
+                <a href="index.html" class="lg:hidden inline-block hover:opacity-80 transition-opacity" title="Stackly Home">
+                    <img src="images/stackly logo.webp" alt="Stackly Aesthetics" class="h-6 sm:h-8 max-w-[105px] sm:max-w-none w-auto object-contain">
+                </a>
+                <div class="hidden lg:flex items-center gap-7">
+                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="services.html" class="nav-link">Services</a>
+                    <a href="about.html" class="nav-link">About</a>
+                    <a href="blog.html" class="nav-link">Blog</a>
+                    <a href="contact.html" class="nav-link">Contact</a>
+                </div>
+                <div class="flex items-center gap-3 ml-auto lg:ml-0">
+                    <span class="text-xs text-brand-muted hidden sm:inline font-light">New to Stackly?</span>
+                    <a href="signup.html" class="text-xs font-medium uppercase tracking-widest border border-brand-accent/40 text-brand-light px-4 py-2 rounded-full hover:bg-brand-light hover:text-brand-dark transition-all duration-300">
+                        Create Account
+                    </a>
+                </div>
+            </header>
+
+            <!-- Form Area -->
+            <main class="flex-1 flex items-center justify-center px-6 md:px-14 py-12">
+                <div class="w-full max-w-md fade-up">
+
+                    <!-- Header -->
+                    <div class="mb-8">
+                        <div class="text-[10px] uppercase tracking-[0.25em] text-brand-accent mb-2.5 font-bold">Client & Stylist Portal</div>
+                        <h2 class="font-serif text-3xl md:text-4xl text-brand-light mb-2">Welcome Back</h2>
+                        <p class="text-sm text-brand-muted font-light">Sign in to manage appointments, hair diagnostics & salon concierge.</p>
+                    </div>
+
+                    <!-- Role Switcher -->
+                    <div class="role-switcher mb-7 fade-up delay-100">
+                        <div class="role-pill" id="role-pill" style="left:4px; width: calc(50% - 8px);"></div>
+                        <button type="button" class="role-btn active" id="btn-user" onclick="selectRole('user')">
+                            <i class="ph-fill ph-user mr-1.5"></i> Guest / Client
+                        </button>
+                        <button type="button" class="role-btn" id="btn-admin" onclick="selectRole('admin')">
+                            <i class="ph-fill ph-shield-check mr-1.5"></i> Stylist / Admin
+                        </button>
+                    </div>
+
+                    <!-- Alert Boxes -->
+                    <div class="alert-error mb-5 fade-up delay-200" id="error-alert" style="display:none;">
+                        <i class="fa-solid fa-triangle-exclamation mt-0.5 shrink-0 text-red-400"></i>
+                        <span id="error-text">Please verify your credentials below.</span>
+                    </div>
+                    <div class="alert-success mb-5 fade-up delay-200" id="success-alert" style="display:none;">
+                        <i class="fa-solid fa-circle-check mt-0.5 shrink-0 text-emerald-400"></i>
+                        <span id="success-text">Authentication successful! Entering Atelier...</span>
+                    </div>
+
+                    <!-- Form -->
+                    <form id="login-form" onsubmit="handleLoginSubmit(event)" novalidate class="space-y-5 fade-up delay-200">
+                        <input type="hidden" id="login-role" value="user">
+
+                        <!-- Email -->
+                        <div>
+                            <label for="login-email" class="block text-[10px] font-bold uppercase tracking-[0.18em] text-brand-accent mb-2">Email Address</label>
+                            <div class="relative">
+                                <i class="ph ph-envelope-simple absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-muted text-lg"></i>
+                                <input type="email" id="login-email" class="auth-input" placeholder="client@stackly.in" autocomplete="email">
+                            </div>
+                            <div class="error-text" id="email-error"><i class="fa-solid fa-circle-xmark mr-1"></i><span id="email-error-msg"></span></div>
+                        </div>
+
+                        <!-- Password -->
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label for="login-password" class="block text-[10px] font-bold uppercase tracking-[0.18em] text-brand-accent">Password</label>
+                                <button type="button" onclick="window.location.href='404.html'" class="text-[10px] text-brand-muted hover:text-brand-light transition-colors uppercase tracking-wider font-medium focus:outline-none bg-transparent border-none cursor-pointer">
+                                    Forgot Password?
+                                </button>
+                            </div>
+                            <div class="relative">
+                                <i class="ph ph-lock-key absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-muted text-lg"></i>
+                                <input type="password" id="login-password" class="auth-input pr-11" placeholder="••••••••" autocomplete="current-password">
+                                <button type="button" onclick="togglePwd('login-password', this)" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-brand-muted hover:text-brand-light transition-colors focus:outline-none cursor-pointer border-none bg-transparent">
+                                    <i class="fa-solid fa-eye text-sm" id="login-pwd-icon"></i>
+                                </button>
+                            </div>
+                            <div class="error-text" id="password-error"><i class="fa-solid fa-circle-xmark mr-1"></i><span id="password-error-msg"></span></div>
+                        </div>
+
+                        <!-- Remember & Security note -->
+                        <div class="flex items-center justify-between pt-1">
+                            <label class="flex items-center gap-2.5 cursor-pointer select-none text-xs text-brand-muted">
+                                <input type="checkbox" id="remember-me" checked class="w-4 h-4 rounded border-brand-light/20 bg-[#1d1d1d] accent-[#4f5945] focus:outline-none">
+                                <span>Remember my session</span>
+                            </label>
+                            <span class="text-[11px] text-brand-muted flex items-center gap-1">
+                                <i class="ph ph-shield-check text-brand-accent"></i> 256-bit Secure
+                            </span>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn-submit mt-6" id="login-btn">
+                            <span class="spinner" id="login-spinner"></span>
+                            <span id="login-btn-text">Enter Atelier</span>
+                            <i class="ph ph-arrow-right text-base" id="login-btn-icon"></i>
+                        </button>
+                    </form>
+
+                    <!-- Social / Alternative login -->
+                    <div class="relative my-7 text-center">
+                        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-brand-light/10"></div></div>
+                        <span class="relative bg-[#141414] px-4 text-[10px] uppercase tracking-widest text-brand-muted">Or continue with</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 fade-up delay-300">
+                        <button type="button" onclick="socialLogin('Google')" class="flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl border border-brand-light/15 bg-white/5 hover:bg-white/10 hover:border-brand-light/30 text-xs font-medium text-brand-light transition-all cursor-pointer">
+                            <i class="fa-brands fa-google text-xs text-red-400"></i> Google
+                        </button>
+                        <button type="button" onclick="socialLogin('Apple')" class="flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl border border-brand-light/15 bg-white/5 hover:bg-white/10 hover:border-brand-light/30 text-xs font-medium text-brand-light transition-all cursor-pointer">
+                            <i class="fa-brands fa-apple text-sm"></i> Apple
+                        </button>
+                    </div>
+
+                    <!-- Bottom Links -->
+                    <div class="mt-8 text-center text-xs text-brand-muted fade-up delay-300">
+                        First time visiting Stackly?
+                        <a href="signup.html" class="text-brand-light font-semibold hover:text-brand-accent underline underline-offset-4 ml-1">Create Atelier Account</a>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <footer class="px-6 md:px-12 py-5 border-t border-brand-light/10 flex flex-wrap justify-between items-center gap-3 text-[11px] text-brand-muted">
+                <p>&copy; 2026 STACKLY AESTHETICS. 124 Styling Ave, Salem, TN 636001.</p>
+                <div class="flex gap-4">
+                    <a href="404.html" class="nav-link text-[10px]">Studio</a>
+                    <a href="404.html" class="nav-link text-[10px]">Treatments</a>
+                    <a href="404.html" class="nav-link text-[10px]">Privacy & Terms</a>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal (Removed per request) -->
+
+    <!-- Script logic -->
+    <script src="validation.js"></script>
+    <script>
+        let currentRole = 'user';
+
+        function selectRole(role) {
+            currentRole = role;
+            document.getElementById('login-role').value = role;
+            const pill = document.getElementById('role-pill');
+            const btnUser = document.getElementById('btn-user');
+            const btnAdmin = document.getElementById('btn-admin');
+
+            if (role === 'user') {
+                pill.style.left = '4px';
+                pill.style.width = 'calc(50% - 8px)';
+                btnUser.classList.add('active');
+                btnAdmin.classList.remove('active');
+            } else {
+                pill.style.left = 'calc(50% + 4px)';
+                pill.style.width = 'calc(50% - 8px)';
+                btnAdmin.classList.add('active');
+                btnUser.classList.remove('active');
+            }
+        }
+
+        function togglePwd(id, btn) {
+            const input = document.getElementById(id);
+            const icon = document.getElementById('login-pwd-icon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        function validateEmailStr(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function handleLoginSubmit(e) {
+            e.preventDefault();
+            const emailInput = document.getElementById('login-email');
+            const passInput = document.getElementById('login-password');
+            const email = emailInput.value.trim();
+            const pass = passInput.value;
+            const role = document.getElementById('login-role').value;
+
+            let valid = true;
+
+            // Email check
+            if (!email) {
+                showFieldErr('login-email', 'email-error', 'email-error-msg', 'Please enter your email address.');
+                valid = false;
+            } else if (!validateEmailStr(email)) {
+                showFieldErr('login-email', 'email-error', 'email-error-msg', 'Please enter a valid email address.');
+                valid = false;
+            } else {
+                clearFieldErr('login-email', 'email-error');
+            }
+
+            // Password check
+            if (!pass) {
+                showFieldErr('login-password', 'password-error', 'password-error-msg', 'Please enter your password.');
+                valid = false;
+            } else if (pass.length < 6) {
+                showFieldErr('login-password', 'password-error', 'password-error-msg', 'Password must be at least 6 characters.');
+                valid = false;
+            } else {
+                clearFieldErr('login-password', 'password-error');
+            }
+
+            if (!valid) {
+                document.getElementById('error-alert').style.display = 'flex';
+                document.getElementById('success-alert').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('error-alert').style.display = 'none';
+
+            // Spinner state
+            const spinner = document.getElementById('login-spinner');
+            const btnText = document.getElementById('login-btn-text');
+            const btnIcon = document.getElementById('login-btn-icon');
+            spinner.style.display = 'inline-block';
+            btnText.textContent = 'Verifying...';
+            btnIcon.style.display = 'none';
+
+            // Save state to localStorage
+            localStorage.setItem('userEmail', email);
+            localStorage.setItem('email', email);
+            localStorage.setItem('role', role);
+            localStorage.setItem('stackly_user_email', email);
+            localStorage.setItem('stackly_user_role', role);
+
+            const mockName = email.split('@')[0].replace(/[._]/g, ' ');
+            const formattedName = mockName.charAt(0).toUpperCase() + mockName.slice(1);
+            localStorage.setItem('name', formattedName);
+            localStorage.setItem('stackly_user_name', formattedName);
+
+            setTimeout(() => {
+                document.getElementById('success-alert').style.display = 'flex';
+                btnText.textContent = 'Welcome Back!';
+
+                setTimeout(() => {
+                    if (role === 'admin') {
+                        window.location.href = 'admin dashboard.html';
+                    } else {
+                        window.location.href = 'user dashboard.html';
+                    }
+                }, 700);
+            }, 600);
+        }
+
+        function showFieldErr(inputId, errBoxId, msgId, text) {
+            const el = document.getElementById(inputId);
+            const box = document.getElementById(errBoxId);
+            const msg = document.getElementById(msgId);
+            if (el) el.classList.add('input-error');
+            if (msg) msg.textContent = text;
+            if (box) box.classList.add('show');
+        }
+
+        function clearFieldErr(inputId, errBoxId) {
+            const el = document.getElementById(inputId);
+            const box = document.getElementById(errBoxId);
+            if (el) { el.classList.remove('input-error'); el.classList.add('input-success'); }
+            if (box) box.classList.remove('show');
+        }
+
+        // Live input handlers
+        document.getElementById('login-email').addEventListener('input', function() {
+            if (this.value.trim() && validateEmailStr(this.value.trim())) {
+                clearFieldErr('login-email', 'email-error');
+            }
+        });
+        document.getElementById('login-password').addEventListener('input', function() {
+            if (this.value.length >= 6) {
+                clearFieldErr('login-password', 'password-error');
+            }
+        });
+
+        // Forgot Modal (Removed)
+
+        function socialLogin(provider) {
+            window.location.href = '404.html';
+        }
+    </script>
+</body>
+</html>

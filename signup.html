@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account | Stackly Aesthetics & Hair Studio</title>
+    <meta name="description" content="Join Stackly Aesthetics & Hair Studio to enjoy personalized hair diagnostics, priority appointment booking, and exclusive Atelier privileges.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif']
+                    },
+                    colors: {
+                        brand: {
+                            light: '#f4f3ed', // Soft off-white
+                            green: '#4f5945', // Deep olive green
+                            dark: '#141414',  // Near black
+                            accent: '#a3a99e', // Soft sage
+                            muted: '#7a7a7a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #141414;
+            color: #f4f3ed;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+        }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #141414; }
+        ::-webkit-scrollbar-thumb { background: #4f5945; border-radius: 10px; }
+
+        /* Auth Input */
+        .auth-input {
+            background: #1d1d1d;
+            border: 1px solid rgba(244, 243, 237, 0.12);
+            color: #f4f3ed;
+            transition: all 0.3s ease;
+            width: 100%;
+            padding: 0.85rem 1rem 0.85rem 2.65rem;
+            border-radius: 12px;
+            font-size: 0.88rem;
+            outline: none;
+        }
+        .auth-input::placeholder { color: #6b7280; }
+        .auth-input:focus {
+            border-color: #4f5945;
+            background: #242424;
+            box-shadow: 0 0 0 3px rgba(79, 89, 69, 0.25);
+        }
+        .auth-input.input-error {
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+        }
+        .auth-input.input-success {
+            border-color: #4f5945 !important;
+            box-shadow: 0 0 0 3px rgba(79, 89, 69, 0.2) !important;
+        }
+
+        /* Role Switcher */
+        .role-switcher {
+            background: #1d1d1d;
+            border: 1px solid rgba(244, 243, 237, 0.1);
+            border-radius: 9999px;
+            padding: 4px;
+            display: flex;
+            position: relative;
+        }
+        .role-pill {
+            position: absolute;
+            top: 4px;
+            bottom: 4px;
+            background: #4f5945;
+            border-radius: 9999px;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .role-btn {
+            flex: 1;
+            padding: 0.65rem 1rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #9ca3af;
+            z-index: 2;
+            position: relative;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            transition: color 0.3s;
+        }
+        .role-btn.active { color: #f4f3ed; }
+
+        /* Submit Button */
+        .btn-submit {
+            width: 100%;
+            padding: 0.95rem 2rem;
+            background: #4f5945;
+            color: #f4f3ed;
+            font-weight: 600;
+            font-size: 0.8rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            border: none;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+        }
+        .btn-submit:hover {
+            background: #3e4636;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(79, 89, 69, 0.35);
+        }
+        .btn-submit:active { transform: translateY(0); }
+
+        /* Strength Meter */
+        .strength-bar-container {
+            display: flex;
+            gap: 4px;
+            height: 4px;
+            border-radius: 2px;
+            overflow: hidden;
+            background: rgba(255,255,255,0.06);
+        }
+        .strength-segment {
+            flex: 1;
+            height: 100%;
+            border-radius: 2px;
+            background: rgba(255,255,255,0.1);
+            transition: background 0.3s ease;
+        }
+        .strength-segment.weak { background: #ef4444; }
+        .strength-segment.medium { background: #f59e0b; }
+        .strength-segment.strong { background: #4f5945; }
+
+        .req-item {
+            font-size: 0.7rem;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            transition: color 0.25s;
+        }
+        .req-item.met { color: #a3a99e; }
+        .req-item.met i { color: #4f5945; }
+
+        /* Left Panel visual */
+        .auth-left-image {
+            position: absolute;
+            inset: 0;
+            background-image: url('images/salon_reception_lounge.webp');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.35;
+        }
+        .auth-left-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(20,20,20,0.85) 0%, rgba(79,89,69,0.5) 50%, rgba(20,20,20,0.92) 100%);
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+            font-size: 0.82rem;
+            color: #fca5a5;
+        }
+        .alert-success {
+            background: rgba(79, 89, 69, 0.2);
+            border: 1px solid rgba(79, 89, 69, 0.4);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+            font-size: 0.82rem;
+            color: #d1fae5;
+        }
+
+        .error-text {
+            font-size: 0.72rem;
+            color: #ef4444;
+            margin-top: 0.35rem;
+            margin-left: 0.25rem;
+            display: none;
+        }
+        .error-text.show { display: block; }
+
+        .nav-link {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: rgba(244, 243, 237, 0.6);
+            transition: color 0.25s;
+        }
+        .nav-link:hover { color: #f4f3ed; }
+
+        .spinner {
+            width: 16px; height: 16px;
+            border: 2px solid rgba(244, 243, 237, 0.3);
+            border-top-color: #f4f3ed;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            display: none;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Fade-in */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-up { animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+    </style>
+</head>
+<body>
+
+    <div class="flex min-h-screen">
+
+        <!-- Left: Atelier Privileges Panel (hidden on mobile) -->
+        <div class="hidden lg:flex lg:w-5/12 flex-col justify-between p-12 xl:p-16 relative bg-[#141414]">
+            <div class="auth-left-image"></div>
+            <div class="auth-left-overlay"></div>
+
+            <!-- Logo -->
+            <div class="relative z-10 flex items-center">
+                <a href="index.html" class="flex items-center gap-3 group">
+                    <img src="images/stackly logo.webp" alt="Stackly Logo" class="h-10 w-auto object-contain">
+                </a>
+            </div>
+
+            <!-- Atelier Membership Perks -->
+            <div class="relative z-10 my-auto py-8">
+                <div class="inline-flex items-center gap-2 border border-brand-accent/30 bg-black/30 backdrop-blur-md px-3.5 py-1.5 rounded-full text-brand-accent text-[10px] uppercase tracking-[0.25em] font-semibold mb-6">
+                    <i class="ph-fill ph-crown"></i> Atelier Member Club
+                </div>
+
+                <h1 class="font-serif text-3xl xl:text-4xl leading-tight text-brand-light mb-6">
+                    An Invitation to <br>
+                    <span class="italic text-brand-accent font-light">Elevated Personal Care</span>
+                </h1>
+
+                <ul class="space-y-4">
+                    <li class="flex items-start gap-3.5 text-xs sm:text-sm text-brand-light/80">
+                        <div class="w-5 h-5 rounded-full bg-brand-green/30 border border-brand-green/60 flex items-center justify-center text-brand-accent shrink-0 mt-0.5">
+                            <i class="ph-bold ph-check text-xs"></i>
+                        </div>
+                        <div>
+                            <span class="font-semibold text-brand-light">500 Welcome Loyalty Points</span>
+                            <p class="text-xs text-brand-light/60 mt-0.5">Credited instantly toward your initial bespoke service or retail purchase.</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3.5 text-xs sm:text-sm text-brand-light/80">
+                        <div class="w-5 h-5 rounded-full bg-brand-green/30 border border-brand-green/60 flex items-center justify-center text-brand-accent shrink-0 mt-0.5">
+                            <i class="ph-bold ph-check text-xs"></i>
+                        </div>
+                        <div>
+                            <span class="font-semibold text-brand-light">Permanent Formula Archive</span>
+                            <p class="text-xs text-brand-light/60 mt-0.5">Exact color levels, developer ratios & scalp treatment histories preserved securely.</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3.5 text-xs sm:text-sm text-brand-light/80">
+                        <div class="w-5 h-5 rounded-full bg-brand-green/30 border border-brand-green/60 flex items-center justify-center text-brand-accent shrink-0 mt-0.5">
+                            <i class="ph-bold ph-check text-xs"></i>
+                        </div>
+                        <div>
+                            <span class="font-semibold text-brand-light">Priority Artisan Reservations</span>
+                            <p class="text-xs text-brand-light/60 mt-0.5">Advance 30-day booking access for peak weekends and holiday styling seasons.</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3.5 text-xs sm:text-sm text-brand-light/80">
+                        <div class="w-5 h-5 rounded-full bg-brand-green/30 border border-brand-green/60 flex items-center justify-center text-brand-accent shrink-0 mt-0.5">
+                            <i class="ph-bold ph-check text-xs"></i>
+                        </div>
+                        <div>
+                            <span class="font-semibold text-brand-light">Complimentary Birthday Blowout</span>
+                            <p class="text-xs text-brand-light/60 mt-0.5">Enjoy our Signature Blowout and scalp massage during your birthday month.</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Clean Beauty Badges -->
+            <div class="relative z-10 border-t border-brand-light/15 pt-6">
+                <div class="text-[9px] uppercase tracking-[0.25em] text-brand-accent mb-3 font-semibold">Our Uncompromising Standards</div>
+                <div class="flex items-center gap-2.5 flex-wrap">
+                    <span class="text-[11px] text-brand-light/80 border border-brand-light/15 bg-black/20 px-3 py-1 rounded-full"><i class="ph ph-leaf text-brand-accent mr-1"></i> Cruelty-Free</span>
+                    <span class="text-[11px] text-brand-light/80 border border-brand-light/15 bg-black/20 px-3 py-1 rounded-full"><i class="ph ph-drop text-brand-accent mr-1"></i> Ammonia-Free</span>
+                    <span class="text-[11px] text-brand-light/80 border border-brand-light/15 bg-black/20 px-3 py-1 rounded-full"><i class="ph ph-sparkle text-brand-accent mr-1"></i> Bond-Protecting</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Sign Up Form -->
+        <div class="w-full lg:w-7/12 flex flex-col min-h-screen bg-[#141414]">
+
+            <!-- Top Navigation -->
+            <header class="sticky top-0 bg-[#141414]/90 backdrop-blur-md z-30 flex justify-between items-center px-4 sm:px-6 md:px-12 py-4 sm:py-5 border-b border-brand-light/10">
+                <a href="index.html" class="lg:hidden flex items-center gap-2 hover:opacity-80 transition-opacity" title="Stackly Home">
+                    <img src="images/stackly logo.webp" alt="Stackly Logo" class="h-6 sm:h-8 max-w-[105px] sm:max-w-none w-auto object-contain">
+                </a>
+                <div class="hidden lg:flex items-center gap-7">
+                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="services.html" class="nav-link">Services</a>
+                    <a href="about.html" class="nav-link">About</a>
+                    <a href="blog.html" class="nav-link">Blog</a>
+                    <a href="contact.html" class="nav-link">Contact</a>
+                </div>
+                <div class="flex items-center gap-3 ml-auto lg:ml-0">
+                    <span class="text-xs text-brand-muted hidden sm:inline font-light">Already a member?</span>
+                    <a href="login.html" class="text-xs font-medium uppercase tracking-widest border border-brand-accent/40 text-brand-light px-4 py-2 rounded-full hover:bg-brand-light hover:text-brand-dark transition-all duration-300">
+                        Sign In
+                    </a>
+                </div>
+            </header>
+
+            <!-- Form Area -->
+            <main class="flex-1 flex items-center justify-center px-6 md:px-14 py-12">
+                <div class="w-full max-w-lg fade-up">
+
+                    <!-- Header -->
+                    <div class="mb-7">
+                        <div class="text-[10px] uppercase tracking-[0.25em] text-brand-accent mb-2 font-bold">New Membership</div>
+                        <h2 class="font-serif text-3xl md:text-4xl text-brand-light mb-2">Create Your Profile</h2>
+                        <p class="text-sm text-brand-muted font-light">Register for your personal client vault, diagnostic history & priority booking.</p>
+                    </div>
+
+                    <!-- Role Switcher -->
+                    <div class="role-switcher mb-7 fade-up delay-100">
+                        <div class="role-pill" id="role-pill" style="left:4px; width: calc(50% - 8px);"></div>
+                        <button type="button" class="role-btn active" id="btn-user" onclick="selectRole('user')">
+                            <i class="ph-fill ph-user mr-1.5"></i> Guest / Client
+                        </button>
+                        <button type="button" class="role-btn" id="btn-admin" onclick="selectRole('admin')">
+                            <i class="ph-fill ph-shield-check mr-1.5"></i> Stylist / Staff
+                        </button>
+                    </div>
+
+                    <!-- Alerts -->
+                    <div class="alert-error mb-5 fade-up delay-100" id="error-alert" style="display:none;">
+                        <i class="fa-solid fa-triangle-exclamation mt-0.5 shrink-0 text-red-400"></i>
+                        <span id="error-text">Please resolve the highlighted fields below.</span>
+                    </div>
+                    <div class="alert-success mb-5 fade-up delay-100" id="success-alert" style="display:none;">
+                        <i class="fa-solid fa-circle-check mt-0.5 shrink-0 text-emerald-400"></i>
+                        <span id="success-text">Atelier account registered! Redirecting to sign in...</span>
+                    </div>
+
+                    <!-- Form -->
+                    <form id="signup-form" onsubmit="handleSignup(event)" novalidate class="space-y-4 fade-up delay-200">
+                        <input type="hidden" id="signup-role" value="user">
+
+                        <!-- Name Row -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label for="first-name" class="block text-[10px] font-bold uppercase tracking-[0.16em] text-brand-accent mb-1.5">First Name</label>
+                                <div class="relative">
+                                    <i class="ph ph-user absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-muted text-base"></i>
+                                    <input type="text" id="first-name" class="auth-input" placeholder="Elena" autocomplete="given-name" pattern="^[^0-9]*$" title="Letters only">
+                                </div>
+                                <div class="error-text" id="fname-error"><i class="fa-solid fa-circle-xmark mr-1"></i><span id="fname-msg"></span></div>
+                            </div>
+                            <div>
+                                <label for="last-name" class="block text-[10px] font-bold uppercase tracking-[0.16em] text-brand-accent mb-1.5">Last Name</label>
+                                <div class="relative">
+                                    <i class="ph ph-user absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-muted text-base"></i>
+                                    <input type="text" id="last-name" class="auth-input" placeholder="Vance" autocomplete="family-name" pattern="^[^0-9]*$" title="Letters only">
+                                </div>
+                                <div class="error-text" id="lname-error"><i class="fa-solid fa-circle-xmark mr-1"></i><span id="lname-msg"></span></div>
+                            </div>
+                        </div>
+
+                        <!-- Email & Phone Row -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label for="signup-email" class="block text-[10px] font-bold uppercase tracking-[0.16em] text-brand-accent mb-1.5">Email Address</label>
+                                <div class="relative">
+                                    <i class="ph ph-envelope-simple absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-muted text-base"></i>
+                                    <input type="email" id="signup-email" class="auth-input" placeholder="elena@example.com" autocomplete="email">
+                                </div>
+                                <div class="error-text" id="email-error"><i class="fa-solid fa-circle-xmark mr-1"></i><span id="email-msg"></span></div>
+                            </div>
+                            <div>
+                                <label for="signup-phone" class="block text-[10px] font-bold uppercase tracking-[0.16em] text-brand-accent mb-1.5">Phone Number</label>
+                                <div class="relative">
+                                    <i class="ph ph-phone absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-muted text-base"></i>
+                                    <input type="tel" id="signup-phone" class="auth-input" placeholder="9876543210" autocomplete="tel">
+                                </div>
+                                <div class="error-text" id="phone-error"><i class="fa-solid fa-circle-xmark mr-1"></i><span id="phone-msg"></span></div>
+                            </div>
+                        </div>
+
+                        <!-- Preferred Service Interest Dropdown -->
+                        <div>
+                            <label for="preferred-service" class="block text-[10px] font-bold uppercase tracking-[0.16em] text-brand-accent mb-1.5">Primary Treatment Interest</label>
+                            <div class="relative">
+                                <i class="ph ph-sparkle absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-muted text-base"></i>
+                                <select id="preferred-service" class="auth-input appearance-none cursor-pointer">
+                                    <option value="Structural Cutting & Styling">Structural Cutting & Styling (₹2,500)</option>
+                                    <option value="Bespoke Balayage & Dimensional Color" selected>Bespoke Balayage & Color (₹6,500)</option>
+                                    <option value="Scalp Detox & Cellular Therapy">Scalp Detox & Therapy (₹1,800)</option>
+                                    <option value="The Complete Canvas Transformation">The Complete Canvas (₹9,500)</option>
+                                    <option value="Editorial & Event Styling">Editorial & Event Styling (₹4,000)</option>
+                                </select>
+                                <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-xs text-brand-muted pointer-events-none"></i>
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div>
+                            <label for="signup-password" class="block text-[10px] font-bold uppercase tracking-[0.16em] text-brand-accent mb-1.5">Create Password</label>
+                            <div class="relative">
+                                <i class="ph ph-lock-key absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-muted text-base"></i>
+                                <input type="password" id="signup-password" class="auth-input pr-11" placeholder="Minimum 8 characters" autocomplete="new-password" oninput="checkStrength(this.value)">
+                                <button type="button" onclick="togglePwd('signup-password', 'signup-pwd-icon')" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-brand-muted hover:text-brand-light transition-colors focus:outline-none cursor-pointer bg-transparent border-none">
+                                    <i class="fa-solid fa-eye text-sm" id="signup-pwd-icon"></i>
+                                </button>
+                            </div>
+                            <div class="error-text" id="pw-error"><i class="fa-solid fa-circle-xmark mr-1"></i><span id="pw-msg"></span></div>
+
+                            <!-- Strength Meter -->
+                            <div class="strength-bar-container mt-2.5" id="strength-bars">
+                                <div class="strength-segment" id="seg1"></div>
+                                <div class="strength-segment" id="seg2"></div>
+                                <div class="strength-segment" id="seg3"></div>
+                                <div class="strength-segment" id="seg4"></div>
+                            </div>
+                            <div id="strength-text" class="text-[10px] font-medium text-brand-muted mt-1"></div>
+
+                            <!-- Requirements Grid -->
+                            <div class="grid grid-cols-2 gap-1.5 mt-2.5">
+                                <div class="req-item" id="req-length"><i class="ph-bold ph-circle"></i> 8+ characters</div>
+                                <div class="req-item" id="req-upper"><i class="ph-bold ph-circle"></i> Uppercase letter</div>
+                                <div class="req-item" id="req-number"><i class="ph-bold ph-circle"></i> Number</div>
+                                <div class="req-item" id="req-special"><i class="ph-bold ph-circle"></i> Symbol ($@#%*!)</div>
+                            </div>
+                        </div>
+
+                        <!-- Confirm Password -->
+                        <div>
+                            <label for="confirm-password" class="block text-[10px] font-bold uppercase tracking-[0.16em] text-brand-accent mb-1.5">Confirm Password</label>
+                            <div class="relative">
+                                <i class="ph ph-lock-key absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-muted text-base"></i>
+                                <input type="password" id="confirm-password" class="auth-input pr-11" placeholder="Repeat your password" autocomplete="new-password">
+                                <button type="button" onclick="togglePwd('confirm-password', 'confirm-pwd-icon')" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-brand-muted hover:text-brand-light transition-colors focus:outline-none cursor-pointer bg-transparent border-none">
+                                    <i class="fa-solid fa-eye text-sm" id="confirm-pwd-icon"></i>
+                                </button>
+                            </div>
+                            <div class="error-text" id="confirm-error"><i class="fa-solid fa-circle-xmark mr-1"></i><span id="confirm-msg"></span></div>
+                        </div>
+
+                        <!-- Terms & Salon Etiquette -->
+                        <div class="pt-1">
+                            <label class="flex items-start gap-2.5 cursor-pointer select-none">
+                                <input type="checkbox" id="terms-check" class="w-4 h-4 rounded border-brand-light/20 bg-[#1d1d1d] accent-[#4f5945] mt-0.5 shrink-0">
+                                <span class="text-xs text-brand-muted leading-relaxed">
+                                    I agree to the <a href="404.html" class="text-brand-light underline underline-offset-2">Salon Etiquette & Terms</a> and <a href="404.html" class="text-brand-light underline underline-offset-2">Privacy Policy</a> of Stackly Aesthetics.
+                                </span>
+                            </label>
+                            <div class="error-text" id="terms-error"><i class="fa-solid fa-circle-xmark mr-1"></i><span id="terms-msg"></span></div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn-submit mt-5" id="signup-btn">
+                            <span class="spinner" id="signup-spinner"></span>
+                            <span id="signup-btn-text">Create Atelier Account</span>
+                            <i class="ph ph-arrow-right text-base" id="signup-btn-icon"></i>
+                        </button>
+                    </form>
+
+                    <!-- Alternative Social Signup -->
+                    <div class="relative my-7 text-center">
+                        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-brand-light/10"></div></div>
+                        <span class="relative bg-[#141414] px-4 text-[10px] uppercase tracking-widest text-brand-muted">Or sign up with</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 fade-up delay-300">
+                        <button type="button" onclick="socialSignup('Google')" class="flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl border border-brand-light/15 bg-white/5 hover:bg-white/10 hover:border-brand-light/30 text-xs font-medium text-brand-light transition-all cursor-pointer">
+                            <i class="fa-brands fa-google text-xs text-red-400"></i> Google
+                        </button>
+                        <button type="button" onclick="socialSignup('Apple')" class="flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl border border-brand-light/15 bg-white/5 hover:bg-white/10 hover:border-brand-light/30 text-xs font-medium text-brand-light transition-all cursor-pointer">
+                            <i class="fa-brands fa-apple text-sm"></i> Apple
+                        </button>
+                    </div>
+
+                    <div class="mt-8 text-center text-xs text-brand-muted fade-up delay-300">
+                        Already have an Atelier account?
+                        <a href="login.html" class="text-brand-light font-semibold hover:text-brand-accent underline underline-offset-4 ml-1">Sign In</a>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <footer class="px-6 md:px-12 py-5 border-t border-brand-light/10 flex flex-wrap justify-between items-center gap-3 text-[11px] text-brand-muted">
+                <p>&copy; 2026 STACKLY AESTHETICS. 124 Styling Ave, Salem, TN 636001.</p>
+                <div class="flex gap-4">
+                    <a href="404.html" class="nav-link text-[10px]">Studio</a>
+                    <a href="404.html" class="nav-link text-[10px]">Treatments</a>
+                    <a href="404.html" class="nav-link text-[10px]">Privacy & Terms</a>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Script logic -->
+    <script src="validation.js"></script>
+    <script>
+        let currentRole = 'user';
+
+        function selectRole(role) {
+            currentRole = role;
+            document.getElementById('signup-role').value = role;
+            const pill = document.getElementById('role-pill');
+            const btnUser = document.getElementById('btn-user');
+            const btnAdmin = document.getElementById('btn-admin');
+            if (role === 'user') {
+                pill.style.left = '4px';
+                pill.style.width = 'calc(50% - 8px)';
+                btnUser.classList.add('active');
+                btnAdmin.classList.remove('active');
+            } else {
+                pill.style.left = 'calc(50% + 4px)';
+                pill.style.width = 'calc(50% - 8px)';
+                btnAdmin.classList.add('active');
+                btnUser.classList.remove('active');
+            }
+        }
+
+        function togglePwd(id, iconId) {
+            const input = document.getElementById(id);
+            const icon = document.getElementById(iconId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        function validateEmailStr(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function validatePhoneStr(phone) {
+            return /^[+]?[\d\s\-().]{7,15}$/.test(phone);
+        }
+
+        function showErr(inputId, errId, msgId, msg) {
+            const el = document.getElementById(inputId);
+            const err = document.getElementById(errId);
+            if (msgId) document.getElementById(msgId).textContent = msg;
+            if (el) { el.classList.add('input-error'); el.classList.remove('input-success'); }
+            if (err) err.classList.add('show');
+        }
+
+        function showOk(inputId, errId) {
+            const el = document.getElementById(inputId);
+            const err = document.getElementById(errId);
+            if (el) { el.classList.remove('input-error'); el.classList.add('input-success'); }
+            if (err) err.classList.remove('show');
+        }
+
+        // Password strength meter
+        function checkStrength(val) {
+            const segs = ['seg1','seg2','seg3','seg4'];
+            const hasLength = val.length >= 8;
+            const hasUpper = /[A-Z]/.test(val);
+            const hasNumber = /[0-9]/.test(val);
+            const hasSpecial = /[^a-zA-Z0-9]/.test(val);
+
+            const updateReq = (id, met) => {
+                const el = document.getElementById(id);
+                if (el) el.className = 'req-item' + (met ? ' met' : '');
+            };
+
+            updateReq('req-length', hasLength);
+            updateReq('req-upper', hasUpper);
+            updateReq('req-number', hasNumber);
+            updateReq('req-special', hasSpecial);
+
+            const score = [hasLength, hasUpper, hasNumber, hasSpecial].filter(Boolean).length;
+            const classes = ['', 'weak', 'medium', 'medium', 'strong'];
+            const labels = ['', 'Weak formulation', 'Fair security', 'Good strength', 'Atelier grade'];
+            const textColors = ['', '#ef4444', '#f59e0b', '#f59e0b', '#a3a99e'];
+
+            segs.forEach((id, i) => {
+                const seg = document.getElementById(id);
+                if (seg) seg.className = 'strength-segment' + (i < score ? ' ' + classes[score] : '');
+            });
+
+            const st = document.getElementById('strength-text');
+            if (val.length > 0) {
+                st.textContent = labels[score];
+                st.style.color = textColors[score];
+            } else {
+                st.textContent = '';
+            }
+        }
+
+        function handleSignup(e) {
+            e.preventDefault();
+            const fname = document.getElementById('first-name').value.trim();
+            const lname = document.getElementById('last-name').value.trim();
+            const email = document.getElementById('signup-email').value.trim();
+            const phone = document.getElementById('signup-phone').value.trim();
+            const pass = document.getElementById('signup-password').value;
+            const confirm = document.getElementById('confirm-password').value;
+            const terms = document.getElementById('terms-check').checked;
+            const role = document.getElementById('signup-role').value;
+
+            let valid = true;
+
+            // Name
+            if (!fname || fname.length < 2 || !/^[a-zA-ZÀ-ÿ\s'-]+$/.test(fname)) {
+                showErr('first-name', 'fname-error', 'fname-msg', 'Please enter a valid first name (letters only).');
+                valid = false;
+            } else {
+                showOk('first-name', 'fname-error');
+            }
+
+            if (!lname || lname.length < 2 || !/^[a-zA-ZÀ-ÿ\s'-]+$/.test(lname)) {
+                showErr('last-name', 'lname-error', 'lname-msg', 'Please enter a valid last name (letters only).');
+                valid = false;
+            } else {
+                showOk('last-name', 'lname-error');
+            }
+
+            // Email
+            if (!email || !validateEmailStr(email)) {
+                showErr('signup-email', 'email-error', 'email-msg', 'Please enter a valid email address.');
+                valid = false;
+            } else {
+                showOk('signup-email', 'email-error');
+            }
+
+            // Phone
+            if (!phone || !validatePhoneStr(phone)) {
+                showErr('signup-phone', 'phone-error', 'phone-msg', 'Please enter a valid phone number (10 digits).');
+                valid = false;
+            } else {
+                showOk('signup-phone', 'phone-error');
+            }
+
+            // Password
+            if (!pass || pass.length < 8 || !/[A-Za-z]/.test(pass) || !/[0-9]/.test(pass)) {
+                showErr('signup-password', 'pw-error', 'pw-msg', 'Password must be 8+ characters with a letter and number.');
+                valid = false;
+            } else {
+                showOk('signup-password', 'pw-error');
+            }
+
+            // Confirm
+            if (!confirm || confirm !== pass) {
+                showErr('confirm-password', 'confirm-error', 'confirm-msg', 'Passwords do not match.');
+                valid = false;
+            } else {
+                showOk('confirm-password', 'confirm-error');
+            }
+
+            // Terms
+            if (!terms) {
+                const terr = document.getElementById('terms-error');
+                document.getElementById('terms-msg').textContent = 'You must agree to the Salon Etiquette & Terms.';
+                terr.classList.add('show');
+                valid = false;
+            } else {
+                document.getElementById('terms-error').classList.remove('show');
+            }
+
+            if (!valid) {
+                document.getElementById('error-alert').style.display = 'flex';
+                document.getElementById('success-alert').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('error-alert').style.display = 'none';
+
+            // Spinner
+            const spinner = document.getElementById('signup-spinner');
+            const btnText = document.getElementById('signup-btn-text');
+            const btnIcon = document.getElementById('signup-btn-icon');
+            spinner.style.display = 'inline-block';
+            btnText.textContent = 'Registering Profile...';
+            btnIcon.style.display = 'none';
+
+            const fullName = fname + ' ' + lname;
+            localStorage.setItem('userEmail', email);
+            localStorage.setItem('email', email);
+            localStorage.setItem('name', fullName);
+            localStorage.setItem('role', role);
+            localStorage.setItem('stackly_user_name', fullName);
+            localStorage.setItem('stackly_user_email', email);
+            localStorage.setItem('stackly_user_phone', phone);
+            localStorage.setItem('stackly_user_role', role);
+
+            setTimeout(() => {
+                document.getElementById('success-alert').style.display = 'flex';
+                btnText.textContent = 'Account Created!';
+
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 900);
+            }, 600);
+        }
+
+        // Live input clearings
+        ['first-name','last-name','signup-email','signup-phone','signup-password','confirm-password'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', () => {
+                    el.classList.remove('input-error');
+                });
+            }
+        });
+
+        function socialSignup(provider) {
+            window.location.href = '404.html';
+        }
+    </script>
+</body>
+</html>

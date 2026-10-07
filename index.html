@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Stackly | Premier Hair Studio & Artistry</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- GSAP for Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            light: '#f4f3ed', // Soft off-white
+                            green: '#4f5945', // Deep olive green
+                            dark: '#141414',  // Near black
+                            accent: '#a3a99e', // Soft sage
+                            muted: '#7a7a7a'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #f4f3ed;
+            color: #141414;
+            overflow-x: hidden;
+            width: 100%;
+        }
+        
+        html {
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f4f3ed;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4f5945;
+            border-radius: 10px;
+        }
+
+        /* Hide scrollbar for horizontal scroll areas */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Outline text effect */
+        .text-outline {
+            color: transparent;
+            -webkit-text-stroke: 1px #141414;
+        }
+        .text-outline-light {
+            color: transparent;
+            -webkit-text-stroke: 1px rgba(244, 243, 237, 0.4);
+        }
+
+        /* Fullscreen Menu Overlay */
+        #menu-overlay {
+            clip-path: circle(0% at top left);
+            transition: clip-path 0.7s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+        #menu-overlay.active {
+            clip-path: circle(150% at top left);
+        }
+
+        /* Slide animations */
+        .slide-up {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .slide-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Form styling */
+        .form-input {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(20, 20, 20, 0.2);
+            border-radius: 0;
+            padding: 12px 0;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.4s;
+            font-size: 16px; /* Prevents iOS zoom */
+        }
+        .form-input:focus {
+            border-color: #4f5945;
+        }
+        .form-input-light {
+            border-bottom-color: rgba(244, 243, 237, 0.2);
+            color: #f4f3ed;
+        }
+        .form-input-light:focus {
+            border-bottom-color: #f4f3ed;
+        }
+
+        /* FAQ Accordion */
+        .faq-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* GSAP Text Reveal Specifics */
+        .reveal-wrapper {
+            display: inline-block;
+            overflow: hidden;
+            padding-bottom: 0.15em;
+            margin-right: 0.2em;
+            vertical-align: top;
+        }
+        .reveal-line {
+            display: inline-block;
+            transform: translateY(100%);
+            opacity: 0;
+            transform-origin: left top;
+        }
+
+        /* Image hover zooms */
+        .img-hover-zoom {
+            overflow: hidden;
+        }
+        .img-hover-zoom img {
+            transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .img-hover-zoom:hover img {
+            transform: scale(1.05);
+        }
+
+        /* Responsive Header Logo */
+        #header-logo {
+            max-width: calc(100% - 165px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto;
+        }
+        #header-logo img {
+            height: 1.35rem; /* ~22px on narrow mobile (320px-374px) */
+            max-width: 80px;
+            width: auto;
+            object-fit: contain;
+            transition: filter 0.3s ease, transform 0.3s ease;
+        }
+        @media (min-width: 375px) {
+            #header-logo img {
+                height: 1.5rem; /* ~24px */
+                max-width: 95px;
+            }
+        }
+        @media (min-width: 480px) {
+            #header-logo {
+                max-width: calc(100% - 200px);
+            }
+            #header-logo img {
+                height: 1.85rem; /* ~30px */
+                max-width: 120px;
+            }
+        }
+        @media (min-width: 640px) {
+            #header-logo {
+                max-width: none;
+            }
+            #header-logo img {
+                height: 2.25rem; /* ~36px */
+                max-width: none;
+            }
+        }
+        @media (min-width: 768px) {
+            #header-logo img {
+                height: 2.75rem; /* ~44px */
+            }
+        }
+
+        /* Scrolled Header Logo - Turn Black on White Header Background */
+        #header-logo img.logo-black,
+        .header-scrolled #header-logo img,
+        header.is-scrolled #header-logo img,
+        header.bg-brand-light #header-logo img,
+        header.bg-white #header-logo img {
+            filter: brightness(0) !important;
+            -webkit-filter: brightness(0) !important;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-brand-green selection:text-brand-light">
+
+    <!-- Header -->
+    <header class="fixed top-0 left-0 w-full z-50 px-3 sm:px-6 md:px-10 py-3 sm:py-6 flex justify-between items-center transition-all duration-500" id="main-header">
+        <!-- Menu Button -->
+        <button id="menu-btn" class="flex items-center gap-2 sm:gap-3 group hover:opacity-70 transition-opacity z-[70] text-brand-light bg-white/10 backdrop-blur-md px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-white/20">
+            <div class="flex flex-col gap-1 sm:gap-1.5 w-4 sm:w-5">
+                <span class="w-full h-[1.5px] bg-current transition-all group-hover:w-3/4"></span>
+                <span class="w-3/4 h-[1.5px] bg-current transition-all group-hover:w-full"></span>
+            </div>
+            <span class="text-[11px] sm:text-sm tracking-widest uppercase font-medium">Menu</span>
+        </button>
+
+        <!-- Centered Logo -->
+        <a href="index.html" class="absolute left-1/2 -translate-x-1/2 text-center z-[60] flex items-center justify-center group pointer-events-auto" id="header-logo" title="Stackly Home">
+            <img src="images/stackly logo.webp" alt="Stackly Aesthetics Logo" class="h-5.5 sm:h-8 md:h-10 lg:h-11 max-h-6 sm:max-h-8 md:max-h-10 lg:max-h-11 max-w-[80px] xs:max-w-[105px] sm:max-w-none w-auto object-contain transition-all duration-300 group-hover:scale-105 filter drop-shadow">
+        </a>
+
+        <!-- Right Side Actions -->
+        <div class="flex items-center gap-2.5 sm:gap-6 text-sm z-[60]">
+            <a href="mailto:hello@stackly.in" class="hidden lg:block hover:opacity-70 transition-opacity text-brand-light drop-shadow-md" id="header-email">hello@stackly.in</a>
+            <a href="login.html" class="border border-brand-light/50 text-brand-light bg-black/20 backdrop-blur-md px-3 sm:px-6 py-1.5 sm:py-2.5 rounded-full hover:bg-brand-light hover:text-brand-dark transition-all duration-300 text-[11px] sm:text-sm tracking-wider uppercase font-medium" id="header-cta">
+                Login
+            </a>
+        </div>
+    </header>
+
+    <!-- Fullscreen Menu Overlay -->
+    <div id="menu-overlay" class="fixed inset-0 bg-brand-light z-[80] flex flex-col justify-between p-6 sm:p-10 md:p-16 h-[100dvh] w-full overflow-y-auto">
+        
+        <!-- Menu Header -->
+        <div class="flex justify-between items-center w-full">
+            <button id="close-menu-btn" class="flex items-center gap-3 text-brand-dark group hover:opacity-70 transition-opacity px-2 py-2">
+                <i class="ph ph-x text-xl sm:text-2xl"></i>
+                <span class="text-xs sm:text-sm tracking-widest uppercase font-medium">Close</span>
+            </button>
+            <a href="index.html" class="inline-flex items-center hover:opacity-80 transition-opacity" title="Stackly Home">
+                <img src="images/stackly logo.webp" alt="Stackly Aesthetics" class="h-7 sm:h-9 md:h-10 w-auto object-contain filter brightness-0">
+            </a>
+            <div class="w-20 hidden sm:block"></div>
+        </div>
+
+        <!-- Menu Content -->
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mt-12 mb-auto flex-grow gap-12 lg:gap-0">
+            <!-- Navigation Links -->
+            <nav class="flex flex-col gap-4 sm:gap-6 md:gap-7 w-full lg:w-1/2">
+                <a href="index.html" class="font-serif text-4xl sm:text-5xl lg:text-[4.2rem] leading-none text-brand-green font-semibold transition-colors menu-link flex items-center gap-3">
+                    <span>Home</span>
+                    <span class="text-xs font-sans uppercase tracking-widest text-brand-accent px-2.5 py-0.5 rounded-full bg-brand-green/10 border border-brand-green/20">Active</span>
+                </a>
+                <a href="about.html" class="font-serif text-4xl sm:text-5xl lg:text-[4.2rem] leading-none text-brand-dark hover:text-brand-green transition-colors menu-link">About</a>
+                <a href="services.html" class="font-serif text-4xl sm:text-5xl lg:text-[4.2rem] leading-none text-brand-dark hover:text-brand-green transition-colors menu-link">Services</a>
+                <a href="blog.html" class="font-serif text-4xl sm:text-5xl lg:text-[4.2rem] leading-none text-brand-dark hover:text-brand-green transition-colors menu-link">Blog</a>
+                <a href="contact.html" class="font-serif text-4xl sm:text-5xl lg:text-[4.2rem] leading-none text-brand-dark hover:text-brand-green transition-colors menu-link">Contact</a>
+                <a href="login.html" class="font-serif text-2xl sm:text-3xl leading-none text-brand-dark/70 hover:text-brand-green transition-colors menu-link mt-2">Client Portal &rarr;</a>
+            </nav>
+
+            <!-- Featured Article (Desktop & Tablet) -->
+            <div class="hidden md:flex flex-row items-center justify-start lg:justify-end gap-6 lg:gap-10 w-full lg:w-1/2">
+                <div class="w-48 lg:w-64">
+                    <div class="w-full aspect-[3/4] overflow-hidden mb-5">
+                        <img src="images/photo-1522337660859-02fbefca4702.webp" alt="Hair Styling" class="w-full h-full object-cover">
+                    </div>
+                    <p class="text-xs text-brand-muted uppercase tracking-widest mb-2">Editorial</p>
+                    <h4 class="font-serif text-xl sm:text-2xl leading-tight">Mastering Texture & Form</h4>
+                </div>
+                
+                <!-- Fixed Blog Button Alignment -->
+                <div class="flex-shrink-0">
+                     <a href="blog.html" class="relative w-28 h-28 lg:w-36 lg:h-36 rounded-full border border-brand-dark flex flex-col items-center justify-center hover:bg-brand-dark hover:text-brand-light transition-colors group menu-link">
+                        <span class="text-center leading-tight text-sm font-medium z-10 relative">Explore<br>Journal</span>
+                        <i class="ph ph-arrow-up-right absolute top-[15%] right-[15%] opacity-0 group-hover:opacity-100 transition-opacity text-xl"></i>
+                     </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menu Footer -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 text-sm text-brand-dark border-t border-brand-dark/20 pt-8 mt-12 pb-4">
+            <div>
+                <h5 class="font-bold mb-3 uppercase tracking-wider text-xs text-brand-muted">Location</h5>
+                <p class="leading-relaxed">Stackly Aesthetics<br>Salem, Tamil Nadu 636001</p>
+            </div>
+            <div>
+                <h5 class="font-bold mb-3 uppercase tracking-wider text-xs text-brand-muted">Connect</h5>
+                <p class="leading-relaxed">hello@stackly.in<br>+91 987 654 3210</p>
+            </div>
+            <div>
+                <h5 class="font-bold mb-3 uppercase tracking-wider text-xs text-brand-muted">Hours</h5>
+                <p class="leading-relaxed">Mon - Fri: 9am - 8pm<br>Sat - Sun: 10am - 7pm</p>
+            </div>
+            <div class="flex gap-4 text-2xl lg:justify-end items-end">
+                <a href="404.html" class="hover:text-brand-green transition-colors"><i class="ph-fill ph-instagram-logo"></i></a>
+                <a href="404.html" class="hover:text-brand-green transition-colors"><i class="ph-fill ph-pinterest-logo"></i></a>
+                <a href="404.html" class="hover:text-brand-green transition-colors"><i class="ph-fill ph-tiktok-logo"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-[100dvh] w-full flex flex-col bg-brand-dark overflow-hidden">
+        
+        <!-- Background Split Layout -->
+        <div class="absolute inset-0 z-0 flex flex-col lg:flex-row w-full h-full">
+            <!-- Left Green Area -->
+            <div class="w-full lg:w-[42%] h-[45vh] lg:h-full bg-brand-green relative flex flex-col justify-end p-6 md:p-12">
+                <!-- Inner floating image (Desktop only) -->
+                <div class="absolute bottom-16 right-12 w-64 h-80 overflow-hidden hidden lg:block border border-white/10 shadow-2xl">
+                     <img src="images/home_hero_left.webp" alt="Salon Details" class="w-full h-full object-cover opacity-80 mix-blend-luminosity">
+                </div>
+            </div>
+            <!-- Right Image Area -->
+            <div class="w-full lg:w-[58%] h-[55vh] lg:h-full relative">
+                <img src="images/home_hero_right.webp" alt="Hair Styling" class="w-full h-full object-cover object-top filter brightness-[0.7] contrast-[1.1]">
+                <div class="absolute inset-0 bg-gradient-to-t from-brand-dark/90 via-transparent to-transparent"></div>
+            </div>
+        </div>
+
+        <!-- Foreground Content Layer -->
+        <div class="relative z-30 w-full min-h-[100dvh] flex flex-col px-4 sm:px-8 lg:px-16 pt-24 pb-6">
+            
+            <!-- Flexible center space for Hero text -->
+            <div class="flex-grow flex flex-col justify-center items-center lg:items-start w-full pt-8 pb-12">
+                <!-- Perfectly aligned and responsive hero text -->
+                <h1 class="font-serif text-[16vw] sm:text-[11vw] lg:text-[8vw] leading-[0.9] text-brand-light uppercase tracking-wide w-full text-center lg:text-left drop-shadow-2xl gsap-hero-text">
+                    <span class="block">Redefine</span>
+                    <span class="block lg:pl-[12%] text-brand-accent italic font-light">Your</span>
+                    <span class="block lg:pl-[24%]">Aesthetic</span>
+                </h1>
+            </div>
+            
+            <div class="flex flex-col w-full mt-auto">
+                <!-- Mobile only brief text -->
+                <p class="text-brand-light/90 text-[13px] sm:text-base max-w-[280px] sm:max-w-xs mx-auto lg:mx-0 text-center lg:text-left mb-8 lg:hidden leading-relaxed drop-shadow-md font-medium">
+                    Salem's exclusive destination for bespoke hair artistry and elevated personal styling.
+                </p>
+                
+                <div class="hidden lg:flex flex-row justify-between items-end w-full mb-12 text-brand-light pr-12">
+                    <p class="text-lg font-light leading-relaxed max-w-sm drop-shadow-md text-brand-light/90 gsap-title">
+                        Salem's exclusive destination for bespoke hair artistry and elevated personal styling.
+                    </p>
+                    <a href="#treatments" class="inline-flex items-center gap-3 border border-brand-light/30 bg-black/20 backdrop-blur-sm px-6 py-3 rounded-full hover:bg-brand-light hover:text-brand-dark transition-all duration-300 text-sm tracking-wider uppercase font-medium group">
+                        <i class="ph-fill ph-play-circle text-xl group-hover:scale-110 transition-transform"></i>
+                        <span>Discover Treatments</span>
+                    </a>
+                </div>
+
+                <!-- Bottom Contact Info Bar -->
+                <div class="w-full flex flex-row flex-wrap lg:flex-nowrap justify-between items-start text-brand-light/80 text-[10px] sm:text-sm gap-y-6 lg:gap-10 border-t border-brand-light/20 pt-6 pb-2">
+                    <div class="w-1/2 lg:w-auto pr-2">
+                        <h6 class="font-medium text-white mb-1.5 uppercase tracking-widest text-[9px] sm:text-xs text-brand-accent">Location</h6>
+                        <p class="leading-tight">124 Styling Ave<br>Salem, TN 636001</p>
+                    </div>
+                    <div class="w-1/2 lg:w-auto pl-2 border-l border-white/10 lg:border-0 lg:pl-0">
+                        <h6 class="font-medium text-white mb-1.5 uppercase tracking-widest text-[9px] sm:text-xs text-brand-accent">Inquiries</h6>
+                        <p class="leading-tight">hello@stackly.in<br>+91 987 654 3210</p>
+                    </div>
+                    <div class="w-full lg:w-auto pt-4 lg:pt-0 border-t border-white/10 lg:border-0 flex justify-between lg:block">
+                        <h6 class="font-medium text-white mb-1.5 uppercase tracking-widest text-[9px] sm:text-xs text-brand-accent block lg:mb-1.5">Schedule</h6>
+                        <div class="text-right lg:text-left leading-tight">
+                            <p>Mon-Fri: 9AM–8PM</p>
+                            <p>Sat-Sun: 10AM–7PM</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Philosophy Section -->
+    <section id="philosophy" class="py-20 sm:py-32 px-4 sm:px-8 lg:px-16 bg-brand-light relative z-40">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col lg:flex-row justify-between gap-12 lg:gap-20 items-start lg:items-center">
+                
+                <!-- Left Text -->
+                <div class="w-full lg:w-1/2">
+                    <p class="text-brand-green text-xs sm:text-sm uppercase tracking-widest font-bold mb-6">Our Philosophy</p>
+                    <h2 class="font-serif text-4xl sm:text-5xl lg:text-[4rem] text-brand-dark leading-[1.1] mb-8 gsap-split-text">
+                        A Sanctuary for <br><span class="italic text-brand-green">Personal Expression</span>
+                    </h2>
+                    <p class="text-brand-muted text-base sm:text-lg mb-10 max-w-lg slide-up leading-relaxed">
+                        We view hair as a canvas and styling as a profound form of self-care. At Stackly, we merge contemporary techniques with a deep respect for individual aesthetics, ensuring every guest leaves feeling entirely like their most elevated self.
+                    </p>
+                    <a href="#team" class="inline-block border-b border-brand-dark pb-1 text-brand-dark hover:text-brand-green hover:border-brand-green transition-colors slide-up uppercase tracking-widest text-sm font-medium">
+                        Meet the Artisans
+                    </a>
+                </div>
+
+                <!-- Right Images (Masonry-ish) -->
+                <div class="w-full lg:w-1/2 flex gap-4 sm:gap-8 justify-end slide-up">
+                    <div class="w-[45%] mt-12 sm:mt-24 img-hover-zoom">
+                        <img src="images/photo-1527799820374-dcf8d9d4a388.webp" alt="Salon Tools" class="w-full aspect-[4/5] object-cover">
+                    </div>
+                    <div class="w-[55%] img-hover-zoom">
+                        <img src="images/photo-1600948836101-f9ffda59d250.webp" alt="Hair Styling" class="w-full aspect-[3/4] object-cover">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats & Quote -->
+            <div class="mt-24 sm:mt-32 flex flex-col md:flex-row justify-between items-start md:items-center border-t border-brand-dark/10 pt-12 sm:pt-16 gap-12">
+                <div class="flex flex-col sm:flex-row gap-10 sm:gap-16 w-full md:w-auto slide-up">
+                    <div>
+                        <p class="font-serif text-5xl sm:text-7xl text-outline mb-2">12k+</p>
+                        <p class="text-xs text-brand-muted uppercase tracking-widest font-medium">Signature Cuts</p>
+                    </div>
+                    <div>
+                        <p class="font-serif text-5xl sm:text-7xl text-outline mb-2">10</p>
+                        <p class="text-xs text-brand-muted uppercase tracking-widest font-medium">Years of Mastery</p>
+                    </div>
+                </div>
+                
+                <div class="w-full md:w-5/12 slide-up pl-4 border-l-2 border-brand-green/30">
+                    <p class="font-serif text-lg sm:text-xl leading-relaxed italic mb-4 text-brand-dark">
+                        "Elegance is not about being noticed, it's about being remembered. We craft looks that resonate long after you leave the chair."
+                    </p>
+                    <p class="text-xs uppercase tracking-widest text-brand-muted font-bold">— Julian Reyes, Lead Director</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Treatments Slider Section -->
+    <section id="treatments" class="relative bg-brand-green text-brand-light overflow-hidden py-20 sm:py-32">
+        <!-- Floating title -->
+        <h2 class="absolute top-10 right-4 sm:top-24 sm:-right-20 font-serif text-[15vw] sm:text-[10rem] opacity-[0.03] pointer-events-none rotate-90 origin-bottom-right hidden md:block whitespace-nowrap">
+            CURATED TREATMENTS
+        </h2>
+
+        <div class="max-w-screen-2xl mx-auto flex flex-col lg:flex-row px-0 lg:px-8">
+            <!-- Content Area (Moves to top on mobile) -->
+            <div class="w-full lg:w-1/2 flex flex-col justify-center px-4 sm:px-8 lg:px-20 py-12 lg:py-0 relative z-10 order-2 lg:order-1">
+                
+                <div class="mb-10 sm:mb-16">
+                    <h2 class="font-serif text-4xl sm:text-5xl lg:text-6xl text-brand-light mb-4 sm:mb-6 gsap-split-text-light">Curated<br>Treatments</h2>
+                    <p class="text-brand-light/70 slide-up text-sm sm:text-base max-w-md">Employing premium formulations and advanced artistry to deliver results that are both striking and structurally sound.</p>
+                </div>
+
+                <!-- Dynamic Content Container -->
+                <div id="service-content" class="min-h-[300px] sm:min-h-[250px]">
+                    <!-- Injected via JS -->
+                </div>
+
+                <!-- Navigation Controls -->
+                <div class="flex items-center justify-between mt-8 pt-8 border-t border-brand-light/20 w-full max-w-md">
+                    <div class="flex gap-2">
+                        <!-- Dots for mobile intuition -->
+                        <div class="w-2 h-2 rounded-full bg-brand-light slide-dot" data-index="0"></div>
+                        <div class="w-2 h-2 rounded-full bg-brand-light/30 slide-dot" data-index="1"></div>
+                        <div class="w-2 h-2 rounded-full bg-brand-light/30 slide-dot" data-index="2"></div>
+                    </div>
+                    <div class="flex gap-3">
+                        <button id="prev-service" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-brand-light/50 flex items-center justify-center hover:bg-brand-light hover:text-brand-green transition-colors group">
+                            <i class="ph ph-arrow-left group-hover:-translate-x-1 transition-transform"></i>
+                        </button>
+                        <button id="next-service" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-brand-light/50 flex items-center justify-center hover:bg-brand-light hover:text-brand-green transition-colors group">
+                            <i class="ph ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image Slider Container (Moves to bottom on mobile) -->
+            <div class="w-full lg:w-1/2 relative h-[50vh] sm:h-[60vh] lg:h-[80vh] overflow-hidden order-1 lg:order-2 px-4 sm:px-8 lg:px-0">
+                <div id="service-images" class="w-full h-full relative transition-transform duration-700 ease-in-out bg-brand-dark">
+                    <img src="images/stylist_precision_cut.webp" class="absolute inset-0 w-full h-full object-cover service-img opacity-100 transition-opacity duration-700" alt="Precision Styling">
+                    <img src="images/hair_balayage_brunette.webp" class="absolute inset-0 w-full h-full object-cover service-img opacity-0 transition-opacity duration-700" alt="Color Theory">
+                    <img src="images/botanical_scalp_ritual.webp" class="absolute inset-0 w-full h-full object-cover service-img opacity-0 transition-opacity duration-700" alt="Scalp Therapy">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section id="team" class="py-20 sm:py-32 bg-brand-dark text-brand-light px-4 sm:px-8 lg:px-16">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 sm:mb-20 gap-8">
+                <div class="w-full md:w-3/5">
+                    <h2 class="font-serif text-4xl sm:text-5xl lg:text-6xl mb-4 sm:mb-6 gsap-split-text-light">The Artisans</h2>
+                    <p class="text-brand-light/60 text-sm sm:text-base max-w-md leading-relaxed">Meet the collective of dedicated professionals who bring rigorous technique and creative intuition to every appointment.</p>
+                </div>
+                <div class="hidden md:block">
+                     <a href="#book" class="inline-flex items-center gap-3 border-b border-brand-light/50 pb-1 hover:text-brand-accent hover:border-brand-accent transition-colors uppercase tracking-widest text-sm">
+                        Book a Consultation
+                    </a>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-10">
+                <!-- Team Member 1 -->
+                <div class="group slide-up">
+                    <div class="overflow-hidden mb-4 sm:mb-6 h-[50vh] sm:h-[450px] relative bg-[#1a1a1a]">
+                        <img src="images/marcus_thorne.webp" alt="Stylist Portrait" class="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700">
+                    </div>
+                    <h3 class="font-serif text-xl sm:text-2xl mb-1">Marcus Thorne</h3>
+                    <p class="text-xs text-brand-accent uppercase tracking-widest">Master of Texture</p>
+                </div>
+                
+                <!-- Team Member 2 -->
+                <div class="group slide-up sm:mt-12">
+                    <div class="overflow-hidden mb-4 sm:mb-6 h-[50vh] sm:h-[450px] relative bg-[#1a1a1a]">
+                        <img src="images/elara_vance.webp" alt="Stylist Portrait" class="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700">
+                    </div>
+                    <h3 class="font-serif text-xl sm:text-2xl mb-1">Elara Vance</h3>
+                    <p class="text-xs text-brand-accent uppercase tracking-widest">Color Architect</p>
+                </div>
+
+                <!-- Team Member 3 -->
+                <div class="group slide-up lg:mt-24">
+                    <div class="overflow-hidden mb-4 sm:mb-6 h-[50vh] sm:h-[450px] relative bg-[#1a1a1a]">
+                        <img src="images/sophia_lin.webp" alt="Stylist Portrait" class="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700">
+                    </div>
+                    <h3 class="font-serif text-xl sm:text-2xl mb-1">Sophia Lin</h3>
+                    <p class="text-xs text-brand-accent uppercase tracking-widest">Bridal & Editorial</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Booking & Hours Section -->
+    <section id="book" class="bg-brand-dark text-brand-light flex flex-col lg:flex-row border-t border-white/5">
+        <!-- Left: Image and Hours -->
+        <div class="w-full lg:w-1/2 relative min-h-[50vh] flex flex-col justify-end px-4 sm:px-12 py-16 sm:py-24 overflow-hidden">
+            <div class="absolute inset-0 z-0">
+                <img src="images/photo-1522337360788-8b13dee7a37e.webp" alt="Salon Details" class="w-full h-full object-cover opacity-20 filter sepia-[0.3]">
+                <div class="absolute inset-0 bg-gradient-to-t from-brand-dark via-transparent to-brand-dark"></div>
+            </div>
+            
+            <div class="relative z-10 w-full max-w-md mx-auto lg:mx-0">
+                <h2 class="font-serif text-3xl sm:text-4xl md:text-5xl mb-10 sm:mb-16 uppercase tracking-widest text-center lg:text-left text-outline-light text-white/90">Hours of<br>Operation</h2>
+                
+                <div class="space-y-6 text-sm sm:text-base">
+                    <div class="flex justify-between items-end border-b border-white/10 pb-3">
+                        <span class="tracking-wide text-brand-light/70">Weekdays</span>
+                        <span class="font-serif text-lg sm:text-xl">09:00 - 20:00</span>
+                    </div>
+                    <div class="flex justify-between items-end border-b border-white/10 pb-3">
+                        <span class="tracking-wide text-brand-light/70">Saturday</span>
+                        <span class="font-serif text-lg sm:text-xl">10:00 - 19:00</span>
+                    </div>
+                    <div class="flex justify-between items-end border-b border-white/10 pb-3">
+                        <span class="tracking-wide text-brand-light/70">Sunday</span>
+                        <span class="font-serif text-lg sm:text-xl text-brand-accent italic">Closed</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Booking Form -->
+        <div class="w-full lg:w-1/2 bg-brand-light text-brand-dark px-4 sm:px-12 py-16 sm:py-24">
+            <div class="max-w-xl mx-auto">
+                <p class="text-brand-green text-xs font-bold uppercase tracking-widest mb-4 text-center lg:text-left">Appointments</p>
+                <h2 class="font-serif text-3xl sm:text-4xl md:text-5xl mb-10 sm:mb-12 uppercase tracking-widest text-center lg:text-left">Secure Your Moment</h2>
+                
+                <form class="space-y-6 sm:space-y-8" onsubmit="event.preventDefault();">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+                        <input type="text" placeholder="Full Name *" required class="form-input bg-transparent placeholder-brand-dark/50 font-serif">
+                        <input type="tel" placeholder="Contact Number *" required class="form-input bg-transparent placeholder-brand-dark/50 font-serif">
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+                        <input type="email" placeholder="Email Address *" required class="form-input bg-transparent placeholder-brand-dark/50 font-serif">
+                        <select class="form-input bg-transparent text-brand-dark/50 font-serif appearance-none cursor-pointer">
+                            <option value="" disabled selected>Desired Service...</option>
+                            <option value="cut">Signature Cut</option>
+                            <option value="color">Bespoke Color</option>
+                            <option value="treatment">Restorative Treatment</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+                        <input type="date" class="form-input bg-transparent text-brand-dark/50 font-serif cursor-pointer">
+                        <select class="form-input bg-transparent text-brand-dark/50 font-serif appearance-none cursor-pointer">
+                            <option value="" disabled selected>Preferred Time...</option>
+                            <option value="am">Morning</option>
+                            <option value="pm">Afternoon</option>
+                            <option value="eve">Evening</option>
+                        </select>
+                    </div>
+                    <textarea placeholder="Any specific requests or hair history we should know?" rows="3" class="form-input bg-transparent placeholder-brand-dark/50 font-serif resize-none"></textarea>
+                    
+                    <div class="flex flex-col sm:flex-row justify-between items-center gap-6 pt-6">
+                        <div class="flex items-center gap-3 text-xs sm:text-sm text-brand-muted order-2 sm:order-1">
+                            <i class="ph ph-lock-key text-lg"></i>
+                            <span>Details remain strictly confidential.</span>
+                        </div>
+                        <button type="submit" class="w-full sm:w-auto bg-brand-dark text-brand-light px-8 py-4 sm:py-3 hover:bg-brand-green transition-colors whitespace-nowrap uppercase tracking-widest text-xs font-medium order-1 sm:order-2">
+                            Request Booking
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="py-20 sm:py-32 bg-brand-light px-4 sm:px-8 lg:px-16 border-t border-brand-dark/5">
+        <div class="max-w-7xl mx-auto flex flex-col lg:flex-row gap-12 sm:gap-16">
+            
+            <div class="w-full lg:w-5/12 slide-up order-2 lg:order-1">
+                <div class="relative h-[40vh] sm:h-[600px] w-full overflow-hidden">
+                    <img src="images/photo-1522337660859-02fbefca4702.webp" alt="Salon Details" class="w-full h-full object-cover object-center">
+                </div>
+            </div>
+
+            <div class="w-full lg:w-7/12 order-1 lg:order-2 lg:pl-10">
+                <p class="text-brand-green text-xs font-bold uppercase tracking-widest mb-4">Clarity</p>
+                <h2 class="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl mb-10 sm:mb-16 gsap-split-text leading-[1.1]">
+                    Client Curiosities
+                </h2>
+                
+                <div class="space-y-2">
+                    <!-- FAQ Item 1 -->
+                    <div class="border-b border-brand-dark/10 pb-2">
+                        <button class="faq-btn w-full text-left py-4 sm:py-5 flex justify-between items-center font-serif text-lg sm:text-xl md:text-2xl hover:text-brand-green transition-colors group">
+                            <span class="pr-6">Do I need a consultation prior to color services?</span>
+                            <i class="ph ph-plus text-xl transition-transform duration-500 text-brand-muted group-hover:text-brand-green shrink-0"></i>
+                        </button>
+                        <div class="faq-content text-sm sm:text-base">
+                            <p class="pb-6 text-brand-muted leading-relaxed pr-6 sm:pr-12">For significant color transformations or corrections, a brief consultation is highly recommended. This ensures our artisans can assess hair integrity, perform patch tests if necessary, and allocate the exact time required for perfection.</p>
+                        </div>
+                    </div>
+                    <!-- FAQ Item 2 -->
+                    <div class="border-b border-brand-dark/10 pb-2">
+                        <button class="faq-btn w-full text-left py-4 sm:py-5 flex justify-between items-center font-serif text-lg sm:text-xl md:text-2xl hover:text-brand-green transition-colors group">
+                            <span class="pr-6">What product lines formulate your treatments?</span>
+                            <i class="ph ph-plus text-xl transition-transform duration-500 text-brand-muted group-hover:text-brand-green shrink-0"></i>
+                        </button>
+                        <div class="faq-content text-sm sm:text-base">
+                            <p class="pb-6 text-brand-muted leading-relaxed pr-6 sm:pr-12">We partner exclusively with sustainable, high-performance brands that prioritize scalp health and vibrant longevity. All formulations are sulfate-free and ethically sourced.</p>
+                        </div>
+                    </div>
+                    <!-- FAQ Item 3 -->
+                    <div class="border-b border-brand-dark/10 pb-2">
+                        <button class="faq-btn w-full text-left py-4 sm:py-5 flex justify-between items-center font-serif text-lg sm:text-xl md:text-2xl hover:text-brand-green transition-colors group">
+                            <span class="pr-6">How should I prepare for my styling session?</span>
+                            <i class="ph ph-plus text-xl transition-transform duration-500 text-brand-muted group-hover:text-brand-green shrink-0"></i>
+                        </button>
+                        <div class="faq-content text-sm sm:text-base">
+                            <p class="pb-6 text-brand-muted leading-relaxed pr-6 sm:pr-12">Arrive with clean, dry hair if you are receiving an updo or dry cut. For color services, hair washed 24 hours prior is ideal as natural oils help protect the scalp during processing.</p>
+                        </div>
+                    </div>
+                    <!-- FAQ Item 4 -->
+                    <div class="border-b border-brand-dark/10 pb-2">
+                        <button class="faq-btn w-full text-left py-4 sm:py-5 flex justify-between items-center font-serif text-lg sm:text-xl md:text-2xl hover:text-brand-green transition-colors group">
+                            <span class="pr-6">What is the cancellation etiquette?</span>
+                            <i class="ph ph-plus text-xl transition-transform duration-500 text-brand-muted group-hover:text-brand-green shrink-0"></i>
+                        </button>
+                        <div class="faq-content text-sm sm:text-base">
+                            <p class="pb-6 text-brand-muted leading-relaxed pr-6 sm:pr-12">We kindly request a minimum of 24 hours' notice for adjustments or cancellations. This courtesy allows us to extend the availability to guests on our waiting list.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Journal Section -->
+    <section id="journal" class="py-20 sm:py-32 bg-[#191919] text-brand-light">
+        <div class="px-4 sm:px-8 lg:px-16 mb-12 sm:mb-20 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-6">
+            <h2 class="font-serif text-3xl sm:text-5xl md:text-6xl uppercase tracking-widest gsap-split-text-light text-center md:text-left">The Style<br>Chronicles</h2>
+            <a href="blog.html" class="hidden md:inline-flex items-center gap-2 border-b border-brand-light/50 pb-1 hover:text-brand-accent hover:border-brand-accent transition-colors uppercase tracking-widest text-xs font-medium">
+                View All Entries <i class="ph ph-arrow-right"></i>
+            </a>
+        </div>
+
+        <!-- Properly Aligned Horizontal Scroll Container -->
+        <div class="flex overflow-x-auto gap-4 sm:gap-6 md:gap-10 px-4 sm:px-8 lg:px-16 pb-12 no-scrollbar snap-x snap-mandatory items-stretch h-full">
+            
+            <!-- Article 1 -->
+            <div class="w-[85vw] max-w-[300px] sm:max-w-none sm:w-[350px] md:w-[420px] flex-shrink-0 snap-center sm:snap-start group cursor-pointer flex flex-col h-auto">
+                <div class="overflow-hidden mb-5 sm:mb-6 aspect-[4/5] w-full bg-[#111]">
+                    <img src="images/photo-1519699047748-de8e457a634e.webp" class="w-full h-full object-cover group-hover:scale-105 group-hover:opacity-80 transition-all duration-700" alt="Texture Waves">
+                </div>
+                <div class="flex flex-col flex-grow">
+                    <p class="text-[10px] sm:text-xs text-brand-light/50 mb-2 sm:mb-3 uppercase tracking-widest font-medium">Insights / Texture</p>
+                    <h3 class="font-serif text-xl sm:text-2xl md:text-3xl mb-3 group-hover:text-brand-accent transition-colors leading-tight">Mastering the Undone Wave</h3>
+                    <p class="text-sm text-brand-light/60 line-clamp-2 mt-auto leading-relaxed">Techniques to achieve effortless, lived-in movement without compromising hair health through excessive heat.</p>
+                </div>
+            </div>
+
+            <!-- Article 2 -->
+            <div class="w-[85vw] max-w-[300px] sm:max-w-none sm:w-[350px] md:w-[420px] flex-shrink-0 snap-center sm:snap-start group cursor-pointer flex flex-col h-auto">
+                <div class="overflow-hidden mb-5 sm:mb-6 aspect-[4/5] w-full bg-[#111]">
+                    <img src="images/hair_gloss_treatment.webp" class="w-full h-full object-cover group-hover:scale-105 group-hover:opacity-80 transition-all duration-700" alt="Color Maintenance">
+                </div>
+                <div class="flex flex-col flex-grow">
+                    <p class="text-[10px] sm:text-xs text-brand-light/50 mb-2 sm:mb-3 uppercase tracking-widest font-medium">Care / Color</p>
+                    <h3 class="font-serif text-xl sm:text-2xl md:text-3xl mb-3 group-hover:text-brand-accent transition-colors leading-tight">Prolonging Salon Vibrancy</h3>
+                    <p class="text-sm text-brand-light/60 line-clamp-2 mt-auto leading-relaxed">Essential rituals and product formulations required to maintain the depth and shine of bespoke color work.</p>
+                </div>
+            </div>
+
+             <!-- Article 3 -->
+             <div class="w-[85vw] max-w-[300px] sm:max-w-none sm:w-[350px] md:w-[420px] flex-shrink-0 snap-center sm:snap-start group cursor-pointer flex flex-col h-auto">
+                <div class="overflow-hidden mb-5 sm:mb-6 aspect-[4/5] w-full bg-[#111]">
+                    <img src="images/botanical_scalp_ritual.webp" class="w-full h-full object-cover group-hover:scale-105 group-hover:opacity-80 transition-all duration-700" alt="Scalp Health">
+                </div>
+                <div class="flex flex-col flex-grow">
+                    <p class="text-[10px] sm:text-xs text-brand-light/50 mb-2 sm:mb-3 uppercase tracking-widest font-medium">Wellness / Scalp</p>
+                    <h3 class="font-serif text-xl sm:text-2xl md:text-3xl mb-3 group-hover:text-brand-accent transition-colors leading-tight">The Foundation of Volume</h3>
+                    <p class="text-sm text-brand-light/60 line-clamp-2 mt-auto leading-relaxed">Understanding why optimal styling begins at the roots and how targeted exfoliation transforms density.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile View All Button -->
+        <div class="text-center mt-4 md:hidden px-4">
+            <a href="blog.html" class="inline-block w-full border border-brand-light/30 py-4 text-xs font-medium uppercase tracking-widest hover:bg-brand-light hover:text-[#191919] transition-colors">
+                View All Entries
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-brand-green text-brand-light pt-20 sm:pt-32 pb-10 px-4 sm:px-8 lg:px-16 border-t border-brand-light/10">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 sm:gap-16 mb-16">
+            
+            <!-- Brand -->
+            <div class="lg:col-span-1">
+                <a href="index.html" class="inline-block mb-6 hover:opacity-80 transition-opacity" title="Stackly Home">
+                    <img src="images/stackly logo.webp" alt="Stackly Aesthetics" class="h-9 sm:h-11 w-auto object-contain">
+                </a>
+                <p class="text-brand-light/70 text-sm mb-8 leading-relaxed max-w-xs">Setting the benchmark for sophisticated hair design and personalized aesthetic care in Salem.</p>
+                <div class="flex gap-4">
+                    <a href="404.html" class="w-10 h-10 rounded-full border border-brand-light/20 flex items-center justify-center hover:bg-brand-light hover:text-brand-green transition-colors"><i class="ph-fill ph-instagram-logo"></i></a>
+                    <a href="404.html" class="w-10 h-10 rounded-full border border-brand-light/20 flex items-center justify-center hover:bg-brand-light hover:text-brand-green transition-colors"><i class="ph-fill ph-pinterest-logo"></i></a>
+                    <a href="404.html" class="w-10 h-10 rounded-full border border-brand-light/20 flex items-center justify-center hover:bg-brand-light hover:text-brand-green transition-colors"><i class="ph-fill ph-facebook-logo"></i></a>
+                </div>
+            </div>
+
+            <!-- Links -->
+            <div>
+                <h4 class="font-serif text-xl sm:text-2xl mb-6">Explore</h4>
+                <ul class="space-y-4 text-sm text-brand-light/70">
+                    <li><a href="404.html" class="hover:text-white hover:translate-x-1 inline-block transition-transform">The Studio</a></li>
+                    <li><a href="404.html" class="hover:text-white hover:translate-x-1 inline-block transition-transform">Philosophy</a></li>
+                    <li><a href="404.html" class="hover:text-white hover:translate-x-1 inline-block transition-transform">Treatments Menu</a></li>
+                    <li><a href="404.html" class="hover:text-white hover:translate-x-1 inline-block transition-transform">Artisans</a></li>
+                </ul>
+            </div>
+            
+            <!-- Legal -->
+            <div>
+                <h4 class="font-serif text-xl sm:text-2xl mb-6">Connect</h4>
+                <ul class="space-y-4 text-sm text-brand-light/70">
+                    <li><a href="404.html" class="hover:text-white hover:translate-x-1 inline-block transition-transform">Request Appointment</a></li>
+                    <li><a href="404.html" class="hover:text-white hover:translate-x-1 inline-block transition-transform">Client Portal</a></li>
+                    <li><a href="404.html" class="hover:text-white hover:translate-x-1 inline-block transition-transform">Terms of Service</a></li>
+                    <li><a href="404.html" class="hover:text-white hover:translate-x-1 inline-block transition-transform">Privacy Policy</a></li>
+                </ul>
+            </div>
+
+            <!-- Newsletter -->
+            <div class="lg:col-span-1">
+                <h4 class="font-serif text-xl sm:text-2xl mb-6">The List</h4>
+                <p class="text-sm text-brand-light/70 mb-6 leading-relaxed">Subscribe for insider styling tips and exclusive seasonal treatment priority.</p>
+                <form class="flex items-end border-b border-brand-light/30 pb-3" onsubmit="event.preventDefault();">
+                    <input type="email" placeholder="Email Address" required class="bg-transparent border-none outline-none w-full text-sm placeholder-brand-light/50 font-serif">
+                    <button type="submit" class="hover:text-brand-accent transition-colors flex items-center justify-center">
+                        <i class="ph ph-arrow-right text-xl"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Footer Bottom -->
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center pt-8 border-t border-brand-light/10 text-[10px] sm:text-xs text-brand-light/50 uppercase tracking-widest gap-4">
+            <p>&copy; 2026 STACKLY AESTHETICS.</p>
+            <button onclick="window.scrollTo(0,0)" class="flex items-center gap-3 hover:text-white transition-colors group">
+                Return to Top
+                <div class="w-8 h-8 rounded-full border border-current flex items-center justify-center group-hover:-translate-y-1 transition-transform">
+                    <i class="ph ph-arrow-up"></i>
+                </div>
+            </button>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            gsap.registerPlugin(ScrollTrigger);
+
+            // Robust Text Split Animation Helper
+            function splitTextForAnimation(selector) {
+                const elements = document.querySelectorAll(selector);
+                elements.forEach(el => {
+                    const text = el.innerText;
+                    el.innerHTML = '';
+                    // Split by spaces but preserve words
+                    const words = text.split(/\s+/);
+                    words.forEach((word) => {
+                        if(word.trim() === '') return;
+                        const wordWrap = document.createElement('span');
+                        wordWrap.className = 'reveal-wrapper';
+                        const innerSpan = document.createElement('span');
+                        innerSpan.className = 'reveal-line';
+                        innerSpan.innerText = word + ' ';
+                        wordWrap.appendChild(innerSpan);
+                        el.appendChild(wordWrap);
+                    });
+                });
+            }
+
+            // Apply to specific text classes
+            splitTextForAnimation('.gsap-title');
+            splitTextForAnimation('.gsap-split-text');
+            splitTextForAnimation('.gsap-split-text-light');
+
+            // Hero Animations (with slight delay for visual stability)
+            setTimeout(() => {
+                // Main massive text spans
+                gsap.fromTo('.gsap-hero-text > span', 
+                    { opacity: 0, y: 50 },
+                    { opacity: 1, y: 0, duration: 1.5, stagger: 0.2, ease: "power4.out", delay: 0.1 }
+                );
+
+                // Title smaller text
+                gsap.to('.gsap-title .reveal-line', {
+                    y: '0%',
+                    opacity: 1,
+                    duration: 1.2,
+                    stagger: 0.05,
+                    ease: "power4.out",
+                    delay: 0.8
+                });
+            }, 100);
+
+            // ScrollTrigger Animations for Text
+            const triggerClasses = ['.gsap-split-text', '.gsap-split-text-light'];
+            triggerClasses.forEach(cls => {
+                document.querySelectorAll(cls).forEach(triggerEl => {
+                    gsap.to(triggerEl.querySelectorAll('.reveal-line'), {
+                        scrollTrigger: {
+                            trigger: triggerEl,
+                            start: "top 90%",
+                        },
+                        y: '0%',
+                        opacity: 1,
+                        duration: 1,
+                        stagger: 0.04,
+                        ease: "power3.out"
+                    });
+                });
+            });
+
+            // --- Header Scroll Effect ---
+            const header = document.getElementById('main-header');
+            const logo = document.getElementById('header-logo');
+            const logoImg = document.querySelector('#header-logo img');
+            const menuBtn = document.getElementById('menu-btn');
+            const email = document.getElementById('header-email');
+            const ctaBtn = document.getElementById('header-cta');
+            
+            function handleHeaderScroll() {
+                if (window.scrollY > 50) {
+                    header.classList.add('bg-brand-light/95', 'backdrop-blur-md', 'shadow-sm', 'py-3', 'is-scrolled');
+                    header.classList.remove('py-4', 'sm:py-6');
+                    
+                    // Turn logo black on white header
+                    if (logoImg) {
+                        logoImg.classList.add('logo-black');
+                        logoImg.style.filter = 'brightness(0)';
+                    }
+                    
+                    if (menuBtn) {
+                        menuBtn.classList.remove('bg-white/10', 'text-brand-light', 'border-white/20');
+                        menuBtn.classList.add('bg-brand-dark', 'text-brand-light');
+                    }
+                    
+                    if (ctaBtn) {
+                        ctaBtn.classList.remove('border-brand-light/50', 'text-brand-light', 'bg-black/20');
+                        ctaBtn.classList.add('border-brand-dark', 'text-brand-dark', 'bg-transparent');
+                    }
+                    
+                    if (email) {
+                        email.classList.remove('text-brand-light', 'drop-shadow-md');
+                        email.classList.add('text-brand-dark');
+                    }
+                } else {
+                    header.classList.add('py-4', 'sm:py-6');
+                    header.classList.remove('bg-brand-light/95', 'backdrop-blur-md', 'shadow-sm', 'py-3', 'is-scrolled');
+                    
+                    // Restore white logo on dark/transparent header
+                    if (logoImg) {
+                        logoImg.classList.remove('logo-black');
+                        logoImg.style.filter = '';
+                    }
+                    
+                    if (menuBtn) {
+                        menuBtn.classList.add('bg-white/10', 'text-brand-light', 'border-white/20');
+                        menuBtn.classList.remove('bg-brand-dark');
+                    }
+                    
+                    if (ctaBtn) {
+                        ctaBtn.classList.add('border-brand-light/50', 'text-brand-light', 'bg-black/20');
+                        ctaBtn.classList.remove('border-brand-dark', 'text-brand-dark', 'bg-transparent');
+                    }
+                    
+                    if (email) {
+                        email.classList.add('text-brand-light', 'drop-shadow-md');
+                        email.classList.remove('text-brand-dark');
+                    }
+                }
+            }
+            window.addEventListener('scroll', handleHeaderScroll);
+            handleHeaderScroll();
+
+            // --- Fullscreen Menu Toggle ---
+            const menuBtnEl = document.getElementById('menu-btn');
+            const closeBtn = document.getElementById('close-menu-btn');
+            const overlay = document.getElementById('menu-overlay');
+            const menuLinks = document.querySelectorAll('.menu-link');
+
+            function toggleMenu() {
+                overlay.classList.toggle('active');
+                if(overlay.classList.contains('active')) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    setTimeout(() => { document.body.style.overflow = ''; }, 700);
+                }
+            }
+
+            menuBtnEl.addEventListener('click', toggleMenu);
+            closeBtn.addEventListener('click', toggleMenu);
+            menuLinks.forEach(link => {
+                link.addEventListener('click', toggleMenu);
+            });
+
+            // --- Services/Treatments Slider Logic ---
+            const servicesData = [
+                {
+                    title: "Precision Styling",
+                    desc: "Structural cutting tailored to your bone structure and natural texture, complemented by a signature blowout.",
+                    features: ["In-depth Consultation", "Bespoke Cut", "Texture Refinement", "Styling Tutorial"]
+                },
+                {
+                    title: "Color Architecture",
+                    desc: "Multi-dimensional color placement including balayage, foils, and glossing, maintaining absolute hair integrity.",
+                    features: ["Tone Mapping", "Foil Work / Painting", "Gloss & Glaze", "Bond Protection"]
+                },
+                {
+                    title: "Scalp & Strand Therapy",
+                    desc: "Intensive repair masks and exfoliation designed to rejuvenate hair from the follicle to the absolute ends.",
+                    features: ["Micro-Exfoliation", "Deep Hydration", "Massage Ritual", "Steam Infusion"]
+                }
+            ];
+
+            let currentSlide = 0;
+            const images = document.querySelectorAll('.service-img');
+            const contentContainer = document.getElementById('service-content');
+            const btnNext = document.getElementById('next-service');
+            const btnPrev = document.getElementById('prev-service');
+            const dots = document.querySelectorAll('.slide-dot');
+
+            function renderServiceContent(index) {
+                const data = servicesData[index];
+                contentContainer.innerHTML = `
+                    <div class="service-details opacity-0 transition-opacity duration-500">
+                        <h3 class="font-serif text-3xl sm:text-4xl mb-3 sm:mb-4 text-brand-light">${data.title}</h3>
+                        <p class="text-brand-light/70 mb-6 sm:mb-8 text-sm sm:text-base max-w-sm leading-relaxed">${data.desc}</p>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm font-medium tracking-wide">
+                            <div class="flex flex-col gap-3">
+                                <span class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-brand-accent"></i> ${data.features[0]}</span>
+                                <span class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-brand-accent"></i> ${data.features[1]}</span>
+                            </div>
+                            <div class="flex flex-col gap-3">
+                                <span class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-brand-accent"></i> ${data.features[2]}</span>
+                                <span class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-brand-accent"></i> ${data.features[3]}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Trigger reflow
+                setTimeout(() => {
+                    const el = contentContainer.querySelector('.service-details');
+                    if(el) {
+                        el.classList.remove('opacity-0');
+                        el.classList.add('opacity-100');
+                    }
+                }, 50);
+
+                // Update dots
+                dots.forEach((dot, i) => {
+                    if(i === index) {
+                        dot.classList.remove('bg-brand-light/30');
+                        dot.classList.add('bg-brand-light');
+                    } else {
+                        dot.classList.add('bg-brand-light/30');
+                        dot.classList.remove('bg-brand-light');
+                    }
+                });
+            }
+
+            function updateSlider(newIndex) {
+                images.forEach((img, i) => {
+                    if (i === newIndex) {
+                        img.classList.remove('opacity-0', 'scale-105');
+                        img.classList.add('opacity-100', 'scale-100');
+                    } else {
+                        img.classList.remove('opacity-100', 'scale-100');
+                        img.classList.add('opacity-0', 'scale-105'); // subtle zoom out effect
+                    }
+                });
+                renderServiceContent(newIndex);
+                currentSlide = newIndex;
+            }
+
+            // Init slider
+            renderServiceContent(0);
+
+            btnNext.addEventListener('click', () => {
+                let next = (currentSlide + 1) % servicesData.length;
+                updateSlider(next);
+            });
+
+            btnPrev.addEventListener('click', () => {
+                let prev = (currentSlide - 1 + servicesData.length) % servicesData.length;
+                updateSlider(prev);
+            });
+
+
+            // --- FAQ Accordion Logic ---
+            const faqBtns = document.querySelectorAll('.faq-btn');
+            
+            faqBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Close others
+                    faqBtns.forEach(otherBtn => {
+                        if (otherBtn !== this) {
+                            otherBtn.classList.remove('text-brand-green');
+                            otherBtn.nextElementSibling.style.maxHeight = null;
+                            otherBtn.querySelector('i').style.transform = 'rotate(0deg)';
+                        }
+                    });
+
+                    // Toggle current
+                    this.classList.toggle('text-brand-green');
+                    const content = this.nextElementSibling;
+                    const icon = this.querySelector('i');
+                    
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                        icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                        icon.style.transform = 'rotate(45deg)';
+                    }
+                });
+            });
+
+            // --- Scroll Reveal Animations (.slide-up) ---
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target); 
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.slide-up').forEach(el => {
+                observer.observe(el);
+            });
+        });
+    </script>
+    <script src="validation.js"></script>
+</body>
+</html>

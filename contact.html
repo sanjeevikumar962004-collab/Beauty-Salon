@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Contact & Studio Location | Stackly Aesthetics</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- GSAP for Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            light: '#f4f3ed', // Soft off-white
+                            green: '#4f5945', // Deep olive green
+                            dark: '#141414',  // Near black
+                            accent: '#a3a99e', // Soft sage
+                            muted: '#7a7a7a'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #f4f3ed;
+            color: #141414;
+            width: 100%;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f4f3ed;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4f5945;
+            border-radius: 10px;
+        }
+
+        /* Fullscreen Menu Overlay */
+        #menu-overlay {
+            clip-path: circle(0% at top left);
+            transition: clip-path 0.7s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+        #menu-overlay.active {
+            clip-path: circle(150% at top left);
+        }
+
+        /* Slide animations */
+        .slide-up {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .slide-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* GSAP Text Reveal Specifics */
+        .reveal-wrapper {
+            display: inline-block;
+            overflow: hidden;
+            padding-bottom: 0.15em;
+            margin-right: 0.2em;
+            vertical-align: top;
+        }
+        .reveal-line {
+            display: inline-block;
+            transform: translateY(0);
+            opacity: 1;
+            transform-origin: left top;
+        }
+
+        /* Map Container Frame */
+        .map-frame {
+            border: 1px solid rgba(79, 89, 69, 0.2);
+            box-shadow: 0 20px 40px -15px rgba(20, 20, 20, 0.15);
+        }
+
+        .form-input {
+            border-bottom: 1px solid rgba(20, 20, 20, 0.2);
+            padding: 0.85rem 0;
+            outline: none;
+            width: 100%;
+            transition: border-color 0.3s ease;
+        }
+        .form-input:focus {
+            border-bottom-color: #4f5945;
+        }
+
+        /* Responsive Header Logo */
+        #header-logo {
+            max-width: calc(100% - 165px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto;
+        }
+        #header-logo img {
+            height: 1.35rem; /* ~22px on narrow mobile (320px-374px) */
+            max-width: 80px;
+            width: auto;
+            object-fit: contain;
+            transition: filter 0.3s ease, transform 0.3s ease;
+        }
+        @media (min-width: 375px) {
+            #header-logo img {
+                height: 1.5rem; /* ~24px */
+                max-width: 95px;
+            }
+        }
+        @media (min-width: 480px) {
+            #header-logo {
+                max-width: calc(100% - 200px);
+            }
+            #header-logo img {
+                height: 1.85rem; /* ~30px */
+                max-width: 120px;
+            }
+        }
+        @media (min-width: 640px) {
+            #header-logo {
+                max-width: none;
+            }
+            #header-logo img {
+                height: 2.25rem; /* ~36px */
+                max-width: none;
+            }
+        }
+        @media (min-width: 768px) {
+            #header-logo img {
+                height: 2.75rem; /* ~44px */
+            }
+        }
+
+        /* Scrolled Header Logo - Turn Black on White Header Background */
+        #header-logo img.logo-black,
+        .header-scrolled #header-logo img,
+        header.is-scrolled #header-logo img,
+        header.bg-brand-light #header-logo img,
+        header.bg-white #header-logo img {
+            filter: brightness(0) !important;
+            -webkit-filter: brightness(0) !important;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-brand-green selection:text-brand-light">
+
+    <!-- Header -->
+    <header class="fixed top-0 left-0 w-full z-50 px-3 sm:px-6 md:px-10 py-3 sm:py-6 flex justify-between items-center transition-all duration-500" id="main-header">
+        <button id="menu-btn" class="flex items-center gap-2 sm:gap-3 group hover:opacity-70 transition-opacity z-[70] text-brand-light bg-white/10 backdrop-blur-md px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-white/20">
+            <div class="flex flex-col gap-1 sm:gap-1.5 w-4 sm:w-5">
+                <span class="w-full h-[1.5px] bg-current transition-all group-hover:w-3/4"></span>
+                <span class="w-3/4 h-[1.5px] bg-current transition-all group-hover:w-full"></span>
+            </div>
+            <span class="text-[11px] sm:text-sm tracking-widest uppercase font-medium">Menu</span>
+        </button>
+
+        <a href="index.html" class="absolute left-1/2 -translate-x-1/2 text-center z-[60] flex items-center justify-center group pointer-events-auto" id="header-logo" title="Stackly Home">
+            <img src="images/stackly logo.webp" alt="Stackly Aesthetics Logo" class="h-5.5 sm:h-8 md:h-10 lg:h-11 max-h-6 sm:max-h-8 md:max-h-10 lg:max-h-11 max-w-[80px] xs:max-w-[105px] sm:max-w-none w-auto object-contain transition-all duration-300 group-hover:scale-105 filter drop-shadow">
+        </a>
+
+        <div class="flex items-center gap-2.5 sm:gap-6 text-sm z-[60]">
+            <a href="mailto:hello@stackly.in" class="hidden lg:block hover:opacity-70 transition-opacity text-brand-light drop-shadow-md" id="header-email">hello@stackly.in</a>
+            <a href="login.html" class="border border-brand-light/50 text-brand-light bg-black/20 backdrop-blur-md px-3 sm:px-6 py-1.5 sm:py-2.5 rounded-full hover:bg-brand-light hover:text-brand-dark transition-all duration-300 text-[11px] sm:text-sm tracking-wider uppercase font-medium" id="header-cta">
+                Login
+            </a>
+        </div>
+    </header>
+
+    <!-- Fullscreen Menu Overlay -->
+    <div id="menu-overlay" class="fixed inset-0 bg-brand-light z-[80] flex flex-col justify-between p-6 sm:p-10 md:p-16 h-[100dvh] w-full overflow-y-auto">
+        <div class="flex justify-between items-center w-full">
+            <button id="close-menu-btn" class="flex items-center gap-3 text-brand-dark group hover:opacity-70 transition-opacity px-2 py-2">
+                <i class="ph ph-x text-xl sm:text-2xl"></i>
+                <span class="text-xs sm:text-sm tracking-widest uppercase font-medium">Close</span>
+            </button>
+            <a href="index.html" class="inline-flex items-center hover:opacity-80 transition-opacity" title="Stackly Home">
+                <img src="images/stackly logo.webp" alt="Stackly Aesthetics" class="h-7 sm:h-9 md:h-10 w-auto object-contain filter brightness-0">
+            </a>
+            <div class="w-20 hidden sm:block"></div>
+        </div>
+
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mt-12 mb-auto flex-grow gap-12 lg:gap-0">
+            <!-- Navigation Links -->
+            <nav class="flex flex-col gap-4 sm:gap-6 w-full lg:w-1/2">
+                <a href="index.html" class="font-serif text-3xl sm:text-4xl lg:text-5xl leading-none text-brand-dark hover:text-brand-green transition-colors menu-link">Home</a>
+                <a href="about.html" class="font-serif text-3xl sm:text-4xl lg:text-5xl leading-none text-brand-dark hover:text-brand-green transition-colors menu-link">About</a>
+                <a href="services.html" class="font-serif text-3xl sm:text-4xl lg:text-5xl leading-none text-brand-dark hover:text-brand-green transition-colors menu-link">Services</a>
+                <a href="blog.html" class="font-serif text-3xl sm:text-4xl lg:text-5xl leading-none text-brand-dark hover:text-brand-green transition-colors menu-link">Blog</a>
+                <a href="contact.html" class="font-serif text-3xl sm:text-4xl lg:text-5xl leading-none text-brand-green font-semibold transition-colors menu-link flex items-center gap-3">
+                    <span>Contact</span>
+                    <span class="text-xs font-sans uppercase tracking-widest text-brand-accent px-2.5 py-0.5 rounded-full bg-brand-green/10 border border-brand-green/20">Active</span>
+                </a>
+                <a href="login.html" class="font-serif text-2xl sm:text-3xl leading-none text-brand-dark/70 hover:text-brand-green transition-colors menu-link mt-2">Client Portal &rarr;</a>
+            </nav>
+
+            <div class="hidden md:flex flex-row items-center justify-start lg:justify-end gap-6 lg:gap-10 w-full lg:w-1/2">
+                <div class="w-48 lg:w-64">
+                    <div class="w-full aspect-[3/4] overflow-hidden mb-5">
+                        <img src="images/photo-1522337660859-02fbefca4702.webp" alt="Hair Styling" class="w-full h-full object-cover">
+                    </div>
+                    <p class="text-xs text-brand-muted uppercase tracking-widest mb-2">Editorial</p>
+                    <h4 class="font-serif text-lg sm:text-xl leading-tight">Mastering Texture & Form</h4>
+                </div>
+                
+                <div class="flex-shrink-0">
+                     <a href="blog.html" class="relative w-24 h-24 lg:w-32 lg:h-32 rounded-full border border-brand-dark flex flex-col items-center justify-center hover:bg-brand-dark hover:text-brand-light transition-colors group menu-link">
+                        <span class="text-center leading-tight text-[11px] lg:text-xs font-medium z-10 relative mt-2">Read<br>the Blog</span>
+                        <i class="ph ph-arrow-up-right absolute top-[20%] right-[20%] opacity-0 group-hover:opacity-100 transition-opacity text-lg"></i>
+                     </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 text-sm text-brand-dark border-t border-brand-dark/20 pt-8 mt-12 pb-4">
+            <div>
+                <h5 class="font-bold mb-3 uppercase tracking-wider text-xs text-brand-muted">Location</h5>
+                <p class="leading-relaxed">Stackly Aesthetics<br>Salem, Tamil Nadu 636001</p>
+            </div>
+            <div>
+                <h5 class="font-bold mb-3 uppercase tracking-wider text-xs text-brand-muted">Connect</h5>
+                <p class="leading-relaxed">hello@stackly.in<br>+91 987 654 3210</p>
+            </div>
+            <div>
+                <h5 class="font-bold mb-3 uppercase tracking-wider text-xs text-brand-muted">Hours</h5>
+                <p class="leading-relaxed">Mon - Fri: 9am - 8pm<br>Sat - Sun: 10am - 7pm</p>
+            </div>
+            <div class="flex gap-4 text-2xl lg:justify-end items-end">
+                <a href="404.html" class="hover:text-brand-green transition-colors"><i class="ph-fill ph-instagram-logo"></i></a>
+                <a href="404.html" class="hover:text-brand-green transition-colors"><i class="ph-fill ph-pinterest-logo"></i></a>
+                <a href="404.html" class="hover:text-brand-green transition-colors"><i class="ph-fill ph-tiktok-logo"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-[70dvh] lg:min-h-[80dvh] w-full flex flex-col bg-brand-dark overflow-hidden pt-28 pb-16 px-4 sm:px-8 lg:px-16">
+        <!-- Background Image with Overlay -->
+        <div class="absolute inset-0 z-0">
+            <img src="images/salon_reception_lounge.webp" alt="Stackly Lounge" class="w-full h-full object-cover opacity-50 filter brightness-90">
+            <div class="absolute inset-0 bg-gradient-to-t from-brand-dark via-brand-dark/60 to-brand-dark/40"></div>
+        </div>
+
+        <div class="relative z-10 w-full flex-grow flex flex-col justify-end items-center lg:items-start max-w-7xl mx-auto pb-8">
+            <p class="text-brand-accent text-xs sm:text-sm uppercase tracking-[0.3em] font-medium mb-4 slide-up delay-100 text-center lg:text-left w-full">Atelier Concierge</p>
+            <h1 class="font-serif text-4xl sm:text-6xl md:text-7xl lg:text-8xl leading-[1.05] text-brand-light text-center lg:text-left w-full gsap-split-text-light drop-shadow-md mb-6">
+                Connect With <br><span class="italic text-brand-accent font-light">Stackly Studio</span>
+            </h1>
+            <p class="text-brand-light/80 text-sm sm:text-base max-w-2xl leading-relaxed text-center lg:text-left slide-up delay-200">
+                We invite you to reach out for appointments, bespoke consultations, or general inquiries. Our concierge team is dedicated to curating your personalized salon experience in Salem.
+            </p>
+        </div>
+    </section>
+
+    <!-- Contact Info Cards Grid -->
+    <section class="py-16 sm:py-24 bg-brand-light px-4 sm:px-8 lg:px-16 border-b border-brand-dark/10">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Studio Location -->
+            <div class="bg-white border border-brand-dark/10 p-8 rounded-2xl hover:border-brand-green/40 transition-all shadow-sm slide-up">
+                <div class="w-12 h-12 rounded-full bg-brand-green/10 text-brand-green flex items-center justify-center mb-6 text-2xl">
+                    <i class="ph-fill ph-map-pin"></i>
+                </div>
+                <h3 class="font-serif text-2xl mb-3 text-brand-dark">The Salon Studio</h3>
+                <p class="text-sm text-brand-muted leading-relaxed mb-4">
+                    Stackly Aesthetics & Hair Studio<br>
+                    124 Styling Avenue, Fairlands<br>
+                    Salem, Tamil Nadu 636001
+                </p>
+                <span class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-brand-green">
+                    Valet Parking Available <i class="ph ph-check-circle"></i>
+                </span>
+            </div>
+
+            <!-- Direct Inquiries -->
+            <div class="bg-white border border-brand-dark/10 p-8 rounded-2xl hover:border-brand-green/40 transition-all shadow-sm slide-up delay-100">
+                <div class="w-12 h-12 rounded-full bg-brand-green/10 text-brand-green flex items-center justify-center mb-6 text-2xl">
+                    <i class="ph-fill ph-envelope-simple-open"></i>
+                </div>
+                <h3 class="font-serif text-2xl mb-3 text-brand-dark">Direct Inquiries</h3>
+                <p class="text-sm text-brand-muted leading-relaxed mb-4">
+                    General: <a href="mailto:hello@stackly.in" class="text-brand-dark font-medium hover:underline">hello@stackly.in</a><br>
+                    Appointments: <a href="tel:+919876543210" class="text-brand-dark font-medium hover:underline">+91 987 654 3210</a><br>
+                    Press & Events: <a href="mailto:concierge@stackly.in" class="text-brand-dark font-medium hover:underline">concierge@stackly.in</a>
+                </p>
+                <span class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-brand-green">
+                    24h Email Response <i class="ph ph-clock"></i>
+                </span>
+            </div>
+
+            <!-- Atelier Hours -->
+            <div class="bg-white border border-brand-dark/10 p-8 rounded-2xl hover:border-brand-green/40 transition-all shadow-sm slide-up delay-200">
+                <div class="w-12 h-12 rounded-full bg-brand-green/10 text-brand-green flex items-center justify-center mb-6 text-2xl">
+                    <i class="ph-fill ph-clock-afternoon"></i>
+                </div>
+                <h3 class="font-serif text-2xl mb-3 text-brand-dark">Studio Hours</h3>
+                <ul class="space-y-2 text-sm text-brand-muted mb-4">
+                    <li class="flex justify-between border-b border-brand-dark/5 pb-1">
+                        <span>Monday – Friday</span>
+                        <span class="font-medium text-brand-dark">09:00 – 20:00</span>
+                    </li>
+                    <li class="flex justify-between border-b border-brand-dark/5 pb-1">
+                        <span>Saturday</span>
+                        <span class="font-medium text-brand-dark">10:00 – 19:00</span>
+                    </li>
+                    <li class="flex justify-between pb-1">
+                        <span>Sunday</span>
+                        <span class="font-medium text-brand-green italic">Closed for Care</span>
+                    </li>
+                </ul>
+                <span class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-brand-green">
+                    Prior Reservation Recommended
+                </span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Contact Form & Studio Imagery Section -->
+    <section class="py-20 sm:py-32 bg-brand-light px-4 sm:px-8 lg:px-16">
+        <div class="max-w-7xl mx-auto flex flex-col lg:flex-row gap-16 lg:gap-20 items-start">
+            
+            <!-- Left: Contact Form -->
+            <div class="w-full lg:w-7/12 bg-white border border-brand-dark/10 p-8 sm:p-12 rounded-3xl shadow-lg">
+                <p class="text-brand-green text-xs font-bold uppercase tracking-widest mb-3">Send a Message</p>
+                <h2 class="font-serif text-3xl sm:text-4xl text-brand-dark mb-4">Inquire or Request Consultation</h2>
+                <p class="text-brand-muted text-sm leading-relaxed mb-10">Whether you wish to schedule a restyle, discuss bespoke bridal color, or inquire about our scalp therapy rituals, our concierge is at your service.</p>
+
+                <form id="contact-form" class="contact-form space-y-8" novalidate>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                        <div>
+                            <label for="contact-name" class="block text-xs font-bold uppercase tracking-wider text-brand-muted mb-2">Full Name *</label>
+                            <input type="text" id="contact-name" name="name" placeholder="E.g. Elena Stackly" class="form-input text-sm text-brand-dark font-serif">
+                        </div>
+                        <div>
+                            <label for="contact-phone" class="block text-xs font-bold uppercase tracking-wider text-brand-muted mb-2">Phone Number *</label>
+                            <input type="tel" id="contact-phone" name="phone" placeholder="+91 98765 43210" class="form-input text-sm text-brand-dark font-serif">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                        <div>
+                            <label for="contact-email" class="block text-xs font-bold uppercase tracking-wider text-brand-muted mb-2">Email Address *</label>
+                            <input type="email" id="contact-email" name="email" placeholder="client@domain.com" class="form-input text-sm text-brand-dark font-serif">
+                        </div>
+                        <div>
+                            <label for="contact-service" class="block text-xs font-bold uppercase tracking-wider text-brand-muted mb-2">Treatment Interest</label>
+                            <select id="contact-service" name="service" class="form-input text-sm text-brand-dark font-serif bg-transparent cursor-pointer">
+                                <option value="">Select Treatment</option>
+                                <option value="Signature Hair Cut & Blowout">Signature Hair Cut & Blowout</option>
+                                <option value="Bespoke Balayage & Dimensional Color">Bespoke Balayage & Color</option>
+                                <option value="Japanese Scalp Therapy Ritual">Scalp Therapy & Detox</option>
+                                <option value="Bridal & Editorial Styling">Bridal & Editorial Styling</option>
+                                <option value="General Studio Inquiry">General Studio Inquiry</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="contact-message" class="block text-xs font-bold uppercase tracking-wider text-brand-muted mb-2">Your Message or Hair Goals *</label>
+                        <textarea id="contact-message" name="message" placeholder="Tell us about your hair history, desired treatment dates, or specific questions..." rows="4" class="form-input text-sm text-brand-dark font-serif resize-none"></textarea>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row justify-between items-center gap-6 pt-4">
+                        <p class="text-xs text-brand-muted flex items-center gap-2">
+                            <i class="ph ph-shield-check text-brand-green text-lg"></i>
+                            Your personal data is treated with total confidentiality.
+                        </p>
+                        <button type="submit" class="w-full sm:w-auto bg-brand-dark text-brand-light px-10 py-4 hover:bg-brand-green transition-colors uppercase tracking-widest text-xs font-medium rounded-full shadow-md">
+                            Send Inquiry <i class="ph ph-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Right: Local WebP Image Showcase -->
+            <div class="w-full lg:w-5/12 flex flex-col gap-8">
+                <div class="relative rounded-3xl overflow-hidden shadow-xl border border-brand-dark/10 group">
+                    <img src="images/salon_interior_luxury.webp" alt="Luxury Salon Interior" class="w-full aspect-[4/3] object-cover group-hover:scale-105 transition-transform duration-700">
+                    <div class="absolute inset-0 bg-gradient-to-t from-brand-dark/80 via-transparent to-transparent flex flex-col justify-end p-8">
+                        <span class="text-xs text-brand-accent uppercase tracking-widest mb-1">Salem Atelier</span>
+                        <h4 class="font-serif text-2xl text-brand-light">Serene Architectural Ambiance</h4>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="rounded-2xl overflow-hidden border border-brand-dark/10 shadow-md">
+                        <img src="images/stylist_precision_cut.webp" alt="Precision Shear Cut" class="w-full aspect-square object-cover">
+                    </div>
+                    <div class="rounded-2xl overflow-hidden border border-brand-dark/10 shadow-md">
+                        <img src="images/botanical_scalp_ritual.webp" alt="Scalp Therapy Ritual" class="w-full aspect-square object-cover">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Embedded Google Maps Section -->
+    <section class="py-20 sm:py-28 bg-[#e8e6df] text-brand-dark px-4 sm:px-8 lg:px-16 border-t border-brand-dark/10">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
+                <p class="text-brand-green text-xs font-bold uppercase tracking-widest mb-3">Find Us in Salem</p>
+                <h2 class="font-serif text-3xl sm:text-5xl mb-4">Location & Directions</h2>
+                <p class="text-brand-muted text-sm leading-relaxed">Conveniently situated in Salem, Tamil Nadu. Visit us for your scheduled transformation or consultation.</p>
+            </div>
+
+            <!-- Map Container Frame -->
+            <div class="w-full rounded-3xl overflow-hidden map-frame bg-white p-2">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4024.1728838782633!2d78.17140487513792!3d11.682961841818727!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3babefef7fd970bb%3A0xe11aef1a71994f9!2sStackly!5e1!3m2!1sen!2sin!4v1791284042341!5m2!1sen!2sin" width="100%" height="480" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-brand-green text-brand-light pt-20 sm:pt-32 pb-10 px-4 sm:px-8 lg:px-16 border-t border-brand-light/10">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 sm:gap-16 mb-16">
+            
+            <div class="lg:col-span-1">
+                <a href="index.html" class="inline-block mb-6 hover:opacity-80 transition-opacity" title="Stackly Home">
+                    <img src="images/stackly logo.webp" alt="Stackly Aesthetics" class="h-9 sm:h-11 w-auto object-contain">
+                </a>
+                <p class="text-brand-light/70 text-sm mb-8 leading-relaxed max-w-xs">Setting the benchmark for sophisticated hair design and personalized aesthetic care in Salem.</p>
+                <div class="flex gap-4">
+                    <a href="404.html" class="w-10 h-10 rounded-full border border-brand-light/20 flex items-center justify-center hover:bg-brand-light hover:text-brand-green transition-colors"><i class="ph-fill ph-instagram-logo"></i></a>
+                    <a href="404.html" class="w-10 h-10 rounded-full border border-brand-light/20 flex items-center justify-center hover:bg-brand-light hover:text-brand-green transition-colors"><i class="ph-fill ph-pinterest-logo"></i></a>
+                    <a href="404.html" class="w-10 h-10 rounded-full border border-brand-light/20 flex items-center justify-center hover:bg-brand-light hover:text-brand-green transition-colors"><i class="ph-fill ph-facebook-logo"></i></a>
+                </div>
+            </div>
+
+            <div>
+                <h4 class="font-serif text-xl sm:text-2xl mb-6">Explore</h4>
+                <ul class="space-y-4 text-sm text-brand-light/70">
+                    <li><a href="404.html" class="hover:text-white hover:translate-x-1 inline-block transition-transform">The Studio</a></li>
+                    <li><a href="404.html" class="hover:text-white hover:translate-x-1 inline-block transition-transform">Philosophy</a></li>
+                    <li><a href="404.html" class="hover:text-white hover:translate-x-1 inline-block transition-transform">Treatments Menu</a></li>
+                    <li><a href="404.html" class="hover:text-white hover:translate-x-1 inline-block transition-transform">Artisans</a></li>
+                </ul>
+            </div>
+            
+            <div>
+                <h4 class="font-serif text-xl sm:text-2xl mb-6">Connect</h4>
+                <ul class="space-y-4 text-sm text-brand-light/70">
+                    <li><a href="404.html" class="hover:text-white hover:translate-x-1 inline-block transition-transform">Request Appointment</a></li>
+                    <li><a href="404.html" class="hover:text-white hover:translate-x-1 inline-block transition-transform">Client Portal</a></li>
+                    <li><a href="404.html" class="hover:text-white hover:translate-x-1 inline-block transition-transform">Terms of Service</a></li>
+                    <li><a href="404.html" class="hover:text-white hover:translate-x-1 inline-block transition-transform">Privacy Policy</a></li>
+                </ul>
+            </div>
+
+            <div class="lg:col-span-1">
+                <h4 class="font-serif text-xl sm:text-2xl mb-6">The List</h4>
+                <p class="text-sm text-brand-light/70 mb-6 leading-relaxed">Subscribe for insider styling tips and exclusive seasonal treatment priority.</p>
+                <form class="newsletter-form-inline flex items-end border-b border-brand-light/30 pb-3" novalidate>
+                    <input type="email" placeholder="Email Address" required class="bg-transparent border-none outline-none w-full text-sm placeholder-brand-light/50 font-serif">
+                    <button type="submit" class="hover:text-brand-accent transition-colors flex items-center justify-center">
+                        <i class="ph ph-arrow-right text-xl"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center pt-8 border-t border-brand-light/10 text-[10px] sm:text-xs text-brand-light/50 uppercase tracking-widest gap-4">
+            <p>&copy; 2026 STACKLY AESTHETICS.</p>
+            <a href="404.html" class="flex items-center gap-3 hover:text-white transition-colors group">
+                Return to Top
+                <div class="w-8 h-8 rounded-full border border-current flex items-center justify-center group-hover:-translate-y-1 transition-transform">
+                    <i class="ph ph-arrow-up"></i>
+                </div>
+            </a>
+        </div>
+    </footer>
+
+    <!-- Script logic -->
+    <script src="validation.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            gsap.registerPlugin(ScrollTrigger);
+
+            // Text split animation helper
+            function splitTextForAnimation(selector) {
+                const elements = document.querySelectorAll(selector);
+                elements.forEach(el => {
+                    const text = el.innerText;
+                    el.innerHTML = '';
+                    const words = text.split(/\s+/);
+                    words.forEach((word) => {
+                        if(word.trim() === '') return;
+                        const wordWrap = document.createElement('span');
+                        wordWrap.className = 'reveal-wrapper';
+                        const innerSpan = document.createElement('span');
+                        innerSpan.className = 'reveal-line';
+                        innerSpan.innerText = word + ' ';
+                        wordWrap.appendChild(innerSpan);
+                        el.appendChild(wordWrap);
+                    });
+                });
+            }
+
+            splitTextForAnimation('.gsap-split-text-light');
+
+            // Trigger GSAP Reveal animation for hero text lines
+            document.querySelectorAll('.gsap-split-text-light').forEach(triggerEl => {
+                const lines = triggerEl.querySelectorAll('.reveal-line');
+                if (lines.length > 0 && typeof gsap !== 'undefined') {
+                    gsap.fromTo(lines, 
+                        { y: '100%', opacity: 0 },
+                        { y: '0%', opacity: 1, duration: 1.2, stagger: 0.05, ease: "power3.out" }
+                    );
+                }
+            });
+
+            // Header scroll handling
+            const header = document.getElementById('main-header');
+            const logo = document.getElementById('header-logo');
+            const logoImg = document.querySelector('#header-logo img');
+            const menuBtn = document.getElementById('menu-btn');
+            const email = document.getElementById('header-email');
+            const ctaBtn = document.getElementById('header-cta');
+            
+            function handleHeaderScroll() {
+                if (window.scrollY > 50) {
+                    header.classList.add('bg-brand-light/95', 'backdrop-blur-md', 'shadow-sm', 'py-3', 'is-scrolled');
+                    header.classList.remove('py-4', 'sm:py-6', 'py-6');
+                    
+                    if (logoImg) {
+                        logoImg.classList.add('logo-black');
+                        logoImg.style.filter = 'brightness(0)';
+                    }
+                    if (menuBtn) {
+                        menuBtn.classList.remove('bg-white/10', 'text-brand-light', 'border-white/20');
+                        menuBtn.classList.add('bg-brand-dark', 'text-brand-light');
+                    }
+                    if (ctaBtn) {
+                        ctaBtn.classList.remove('border-brand-light/50', 'text-brand-light', 'bg-black/20');
+                        ctaBtn.classList.add('border-brand-dark', 'text-brand-dark', 'bg-transparent');
+                    }
+                    if (email) {
+                        email.classList.remove('text-brand-light', 'drop-shadow-md');
+                        email.classList.add('text-brand-dark');
+                    }
+                } else {
+                    header.classList.add('py-4', 'sm:py-6');
+                    header.classList.remove('bg-brand-light/95', 'backdrop-blur-md', 'shadow-sm', 'py-3', 'is-scrolled');
+                    
+                    if (logoImg) {
+                        logoImg.classList.remove('logo-black');
+                        logoImg.style.filter = '';
+                    }
+                    if (menuBtn) {
+                        menuBtn.classList.add('bg-white/10', 'text-brand-light', 'border-white/20');
+                        menuBtn.classList.remove('bg-brand-dark');
+                    }
+                    if (ctaBtn) {
+                        ctaBtn.classList.add('border-brand-light/50', 'text-brand-light', 'bg-black/20');
+                        ctaBtn.classList.remove('border-brand-dark', 'text-brand-dark', 'bg-transparent');
+                    }
+                    if (email) {
+                        email.classList.add('text-brand-light', 'drop-shadow-md');
+                        email.classList.remove('text-brand-dark');
+                    }
+                }
+            }
+            window.addEventListener('scroll', handleHeaderScroll);
+            handleHeaderScroll();
+
+            // Fullscreen Menu Toggle
+            const menuBtnEl = document.getElementById('menu-btn');
+            const closeBtn = document.getElementById('close-menu-btn');
+            const overlay = document.getElementById('menu-overlay');
+            const menuLinks = document.querySelectorAll('.menu-link');
+
+            function toggleMenu() {
+                overlay.classList.toggle('active');
+                if(overlay.classList.contains('active')) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    setTimeout(() => { document.body.style.overflow = ''; }, 700);
+                }
+            }
+
+            menuBtnEl.addEventListener('click', toggleMenu);
+            closeBtn.addEventListener('click', toggleMenu);
+            menuLinks.forEach(link => {
+                link.addEventListener('click', toggleMenu);
+            });
+
+            // Scroll reveal observers
+            const observer = new IntersectionObserver((entries, obs) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        obs.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.15 });
+
+            document.querySelectorAll('.slide-up').forEach(el => observer.observe(el));
+        });
+
+        // Contact Form Submission Handler
+        function handleContactSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('contact-name').value.trim();
+            const email = document.getElementById('contact-email').value.trim();
+            
+            if (name && email) {
+                if (typeof showSuccessModal === 'function') {
+                    showSuccessModal(
+                        'Inquiry Received',
+                        `Thank you, ${name}. Our studio concierge will contact you at ${email} within 24 hours to confirm your consultation.`
+                    );
+                } else {
+                    alert(`Thank you, ${name}! Your inquiry has been sent.`);
+                }
+                document.getElementById('contact-form').reset();
+            }
+        }
+    </script>
+</body>
+</html>

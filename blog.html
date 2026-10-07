@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Journal | Stackly Aesthetics</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- GSAP for Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            light: '#f4f3ed', // Soft off-white
+                            green: '#4f5945', // Deep olive green
+                            dark: '#141414',  // Near black
+                            accent: '#a3a99e', // Soft sage
+                            muted: '#7a7a7a'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #f4f3ed;
+            color: #141414;
+            width: 100%;
+        }
+        
+        html {
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f4f3ed;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4f5945;
+            border-radius: 10px;
+        }
+        
+        /* Hide scrollbar for horizontal scrolling filter bar */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Fullscreen Menu Overlay */
+        #menu-overlay {
+            clip-path: circle(0% at top left);
+            transition: clip-path 0.7s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+        #menu-overlay.active {
+            clip-path: circle(150% at top left);
+        }
+
+        /* Slide animations */
+        .slide-up {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .slide-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* GSAP Text Reveal Specifics */
+        .reveal-wrapper {
+            display: inline-block;
+            overflow: hidden;
+            padding-bottom: 0.15em;
+            margin-right: 0.2em;
+            vertical-align: top;
+        }
+        .reveal-line {
+            display: inline-block;
+            transform: translateY(100%);
+            opacity: 0;
+            transform-origin: left top;
+        }
+
+        /* Image Parallax Container */
+        .parallax-container {
+            overflow: hidden;
+            position: relative;
+        }
+        .parallax-img {
+            height: 120%;
+            width: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: -10%;
+        }
+
+        /* Image hover zooms */
+        .img-hover-zoom {
+            overflow: hidden;
+        }
+        .img-hover-zoom img {
+            transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .img-hover-zoom:hover img {
+            transform: scale(1.05);
+        }
+
+        /* Responsive Header Logo */
+        #header-logo {
+            max-width: calc(100% - 165px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto;
+        }
+        #header-logo img {
+            height: 1.35rem; /* ~22px on narrow mobile (320px-374px) */
+            max-width: 80px;
+            width: auto;
+            object-fit: contain;
+            transition: filter 0.3s ease, transform 0.3s ease;
+        }
+        @media (min-width: 375px) {
+            #header-logo img {
+                height: 1.5rem; /* ~24px */
+                max-width: 95px;
+            }
+        }
+        @media (min-width: 480px) {
+            #header-logo {
+                max-width: calc(100% - 200px);
+            }
+            #header-logo img {
+                height: 1.85rem; /* ~30px */
+                max-width: 120px;
+            }
+        }
+        @media (min-width: 640px) {
+            #header-logo {
+                max-width: none;
+            }
+            #header-logo img {
+                height: 2.25rem; /* ~36px */
+                max-width: none;
+            }
+        }
+        @media (min-width: 768px) {
+            #header-logo img {
+                height: 2.75rem; /* ~44px */
+            }
+        }
+
+        /* Scrolled Header Logo - Turn Black on White Header Background */
+        #header-logo img.logo-black,
+        .header-scrolled #header-logo img,
+        header.is-scrolled #header-logo img,
+        header.bg-brand-light #header-logo img,
+        header.bg-white #header-logo img {
+            filter: brightness(0) !important;
+            -webkit-filter: brightness(0) !important;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-brand-green selection:text-brand-light">
+
+    <!-- Header -->
+    <header class="fixed top-0 left-0 w-full z-50 px-3 sm:px-6 md:px-10 py-3 sm:py-6 flex justify-between items-center transition-all duration-500" id="main-header">
+        <button id="menu-btn" class="flex items-center gap-2 sm:gap-3 group hover:opacity-70 transition-opacity z-[70] text-brand-light bg-white/10 backdrop-blur-md px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-white/20">
+            <div class="flex flex-col gap-1 sm:gap-1.5 w-4 sm:w-5">
+                <span class="w-full h-[1.5px] bg-current transition-all group-hover:w-3/4"></span>
+                <span class="w-3/4 h-[1.5px] bg-current transition-all group-hover:w-full"></span>
+            </div>
+            <span class="text-[11px] sm:text-sm tracking-widest uppercase font-medium">Menu</span>
+        </button>
+
+        <a href="index.html" class="absolute left-1/2 -translate-x-1/2 text-center z-[60] flex items-center justify-center group pointer-events-auto" id="header-logo" title="Stackly Home">
+            <img src="images/stackly logo.webp" alt="Stackly Aesthetics Logo" class="h-5.5 sm:h-8 md:h-10 lg:h-11 max-h-6 sm:max-h-8 md:max-h-10 lg:max-h-11 max-w-[80px] xs:max-w-[105px] sm:max-w-none w-auto object-contain transition-all duration-300 group-hover:scale-105 filter drop-shadow">
+        </a>
+
+        <div class="flex items-center gap-2.5 sm:gap-6 text-sm z-[60]">
+            <a href="mailto:hello@stackly.in" class="hidden lg:block hover:opacity-70 transition-opacity text-brand-light drop-shadow-md" id="header-email">hello@stackly.in</a>
+            <a href="login.html" class="border border-brand-light/50 text-brand-light bg-black/20 backdrop-blur-md px-3 sm:px-6 py-1.5 sm:py-2.5 rounded-full hover:bg-brand-light hover:text-brand-dark transition-all duration-300 text-[11px] sm:text-sm tracking-wider uppercase font-medium" id="header-cta">
+                Login
+            </a>
+        </div>
+    </header>
+
+    <!-- Fullscreen Menu Overlay -->
+    <div id="menu-overlay" class="fixed inset-0 bg-brand-light z-[80] flex flex-col justify-between p-6 sm:p-10 md:p-16 h-[100dvh] w-full overflow-y-auto">
+        <div class="flex justify-between items-center w-full">
+            <button id="close-menu-btn" class="flex items-center gap-3 text-brand-dark group hover:opacity-70 transition-opacity px-2 py-2">
+                <i class="ph ph-x text-xl sm:text-2xl"></i>
+                <span class="text-xs sm:text-sm tracking-widest uppercase font-medium">Close</span>
+            </button>
+            <a href="index.html" class="inline-flex items-center hover:opacity-80 transition-opacity" title="Stackly Home">
+                <img src="images/stackly logo.webp" alt="Stackly Aesthetics" class="h-7 sm:h-9 md:h-10 w-auto object-contain filter brightness-0">
+            </a>
+            <div class="w-20 hidden sm:block"></div>
+        </div>
+
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mt-12 mb-auto flex-grow gap-12 lg:gap-0">
+            <!-- Navigation Links -->
+            <nav class="flex flex-col gap-4 sm:gap-6 md:gap-8 w-full lg:w-1/2">
+                <a href="index.html" class="font-serif text-4xl sm:text-5xl lg:text-[4.5rem] leading-none text-brand-dark hover:text-brand-green transition-colors menu-link">Home</a>
+                <a href="about.html" class="font-serif text-4xl sm:text-5xl lg:text-[4.5rem] leading-none text-brand-dark hover:text-brand-green transition-colors menu-link">About</a>
+                <a href="services.html" class="font-serif text-4xl sm:text-5xl lg:text-[4.5rem] leading-none text-brand-dark hover:text-brand-green transition-colors menu-link">Services</a>
+                <a href="blog.html" class="font-serif text-4xl sm:text-5xl lg:text-[4.5rem] leading-none text-brand-green font-semibold transition-colors menu-link flex items-center gap-3">
+                    <span>Blog</span>
+                    <span class="text-xs font-sans uppercase tracking-widest text-brand-accent px-2.5 py-0.5 rounded-full bg-brand-green/10 border border-brand-green/20">Active</span>
+                </a>
+                <a href="contact.html" class="font-serif text-4xl sm:text-5xl lg:text-[4.5rem] leading-none text-brand-dark hover:text-brand-green transition-colors menu-link">Contact</a>
+                <a href="login.html" class="font-serif text-2xl sm:text-3xl leading-none text-brand-dark/70 hover:text-brand-green transition-colors menu-link mt-2">Client Portal &rarr;</a>
+            </nav>
+
+            <div class="hidden md:flex flex-row items-center justify-start lg:justify-end gap-6 lg:gap-10 w-full lg:w-1/2">
+                <div class="w-48 lg:w-64">
+                    <div class="w-full aspect-[3/4] overflow-hidden mb-5">
+                        <img src="images/photo-1522337660859-02fbefca4702.webp" alt="Hair Styling" class="w-full h-full object-cover">
+                    </div>
+                    <p class="text-xs text-brand-muted uppercase tracking-widest mb-2">Editorial</p>
+                    <h4 class="font-serif text-xl sm:text-2xl leading-tight">Mastering Texture & Form</h4>
+                </div>
+                
+                <div class="flex-shrink-0">
+                     <a href="blog.html" class="relative w-28 h-28 lg:w-36 lg:h-36 rounded-full border border-brand-dark flex flex-col items-center justify-center hover:bg-brand-dark hover:text-brand-light transition-colors group menu-link">
+                        <span class="text-center leading-tight text-sm font-medium z-10 relative">Explore<br>Journal</span>
+                        <i class="ph ph-arrow-up-right absolute top-[25%] right-[25%] opacity-0 group-hover:opacity-100 transition-opacity text-xl"></i>
+                     </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 text-sm text-brand-dark border-t border-brand-dark/20 pt-8 mt-12 pb-4">
+            <div>
+                <h5 class="font-bold mb-3 uppercase tracking-wider text-xs text-brand-muted">Location</h5>
+                <p class="leading-relaxed">Stackly Aesthetics<br>Salem, Tamil Nadu 636001</p>
+            </div>
+            <div>
+                <h5 class="font-bold mb-3 uppercase tracking-wider text-xs text-brand-muted">Connect</h5>
+                <p class="leading-relaxed">hello@stackly.in<br>+91 987 654 3210</p>
+            </div>
+            <div>
+                <h5 class="font-bold mb-3 uppercase tracking-wider text-xs text-brand-muted">Hours</h5>
+                <p class="leading-relaxed">Mon - Fri: 9am - 8pm<br>Sat - Sun: 10am - 7pm</p>
+            </div>
+            <div class="flex gap-4 text-2xl lg:justify-end items-end">
+                <a href="404.html" class="hover:text-brand-green transition-colors"><i class="ph-fill ph-instagram-logo"></i></a>
+                <a href="404.html" class="hover:text-brand-green transition-colors"><i class="ph-fill ph-pinterest-logo"></i></a>
+                <a href="404.html" class="hover:text-brand-green transition-colors"><i class="ph-fill ph-tiktok-logo"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero / Featured Article Section -->
+    <section class="relative min-h-[90dvh] w-full flex flex-col bg-brand-dark overflow-hidden pt-24 pb-16 px-4 sm:px-8 lg:px-16">
+        
+        <!-- Background Image with Overlay -->
+        <div class="absolute inset-0 z-0">
+            <img src="images/salon_interior_luxury.webp" alt="Salon Ambiance" class="w-full h-full object-cover opacity-60">
+            <div class="absolute inset-0 bg-gradient-to-t from-brand-dark via-brand-dark/50 to-brand-dark/30"></div>
+        </div>
+
+        <div class="relative z-10 w-full h-full flex-grow flex flex-col justify-between max-w-7xl mx-auto">
+            
+            <div class="pt-8">
+                <p class="text-brand-accent text-xs sm:text-sm uppercase tracking-[0.3em] font-medium mb-6 slide-up delay-100 text-center lg:text-left">The Chronicle</p>
+                <h1 class="font-serif text-5xl sm:text-6xl md:text-8xl lg:text-[7rem] leading-[1] text-brand-light text-center lg:text-left w-full gsap-hero-text drop-shadow-md">
+                    <span class="block">Artistry &</span>
+                    <span class="block italic font-light text-brand-accent">Insights</span>
+                </h1>
+            </div>
+
+            <!-- Featured Article Block -->
+            <div class="w-full lg:w-1/2 self-end mt-auto pt-20 pb-4 slide-up delay-300">
+                <div class="inline-block bg-brand-green text-brand-light text-[10px] uppercase tracking-widest font-bold px-3 py-1 mb-4">Latest Editorial</div>
+                <h2 class="font-serif text-3xl sm:text-4xl lg:text-5xl text-white leading-tight mb-4 group-hover:text-brand-accent transition-colors">
+                    The Architecture of the Perfect Blowout
+                </h2>
+                <p class="text-brand-light/70 text-sm sm:text-base leading-relaxed mb-8 max-w-md">
+                    Discover the intricate balance of heat styling, tension, and premium product application required to achieve volume that lasts beautifully for days.
+                </p>
+                <a href="404.html" class="inline-flex items-center gap-3 border-b border-brand-accent pb-1 text-brand-accent hover:text-white hover:border-white transition-colors uppercase tracking-widest text-xs font-medium">
+                    Read Full Story <i class="ph ph-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Category Navigation -->
+    <div class="w-full bg-brand-light border-b border-brand-dark/10 sticky top-0 z-40 transition-all duration-300" id="filter-bar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 flex items-center justify-start overflow-x-auto no-scrollbar py-4 sm:py-6 gap-8 text-xs sm:text-sm uppercase tracking-widest font-medium text-brand-muted whitespace-nowrap">
+            <a href="blog.html" class="text-brand-dark border-b border-brand-dark pb-1">All Stories</a>
+            <a href="404.html" class="hover:text-brand-dark transition-colors pb-1 border-b border-transparent hover:border-brand-dark">Trends & Styling</a>
+            <a href="404.html" class="hover:text-brand-dark transition-colors pb-1 border-b border-transparent hover:border-brand-dark">Color Theory</a>
+            <a href="404.html" class="hover:text-brand-dark transition-colors pb-1 border-b border-transparent hover:border-brand-dark">Scalp & Wellness</a>
+            <a href="404.html" class="hover:text-brand-dark transition-colors pb-1 border-b border-transparent hover:border-brand-dark">Inside Stackly</a>
+        </div>
+    </div>
+
+    <!-- NEW SECTION: Editor's Selection -->
+    <section class="py-16 sm:py-24 px-4 sm:px-8 lg:px-16 bg-brand-light text-brand-dark border-b border-brand-dark/10">
+        <div class="max-w-7xl mx-auto flex flex-col lg:flex-row gap-12 lg:gap-20 items-center">
+            <div class="w-full lg:w-1/2 slide-up">
+                <div class="img-hover-zoom aspect-[4/3] w-full bg-brand-dark/5">
+                    <img src="images/editorial_hair_updo.webp" alt="Editor Highlight" class="w-full h-full object-cover">
+                </div>
+            </div>
+            <div class="w-full lg:w-1/2 flex flex-col justify-center slide-up delay-100">
+                <div class="flex items-center gap-4 mb-6">
+                    <span class="inline-block bg-brand-dark text-brand-light text-[10px] uppercase tracking-widest font-bold px-3 py-1">Editor's Pick</span>
+                    <span class="text-[10px] text-brand-muted uppercase tracking-widest font-medium">Inside Stackly</span>
+                </div>
+                <h2 class="font-serif text-4xl sm:text-5xl leading-tight mb-6">The Future of Sustainable Salon Practices</h2>
+                <p class="text-sm sm:text-base text-brand-muted leading-relaxed mb-8 max-w-lg">
+                    As the beauty industry evolves, so must our commitment to the environment. Explore how Stackly is pioneering eco-conscious styling without compromising on the luxury experience or structural integrity of your hair.
+                </p>
+                <a href="404.html" class="inline-flex items-center gap-3 border-b border-brand-dark pb-1 text-brand-dark hover:text-brand-green hover:border-brand-green transition-colors uppercase tracking-widest text-xs font-medium self-start">
+                    Read The Article <i class="ph ph-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Article Grid Section (Fixed Alignment) -->
+    <section class="py-20 sm:py-32 px-4 sm:px-8 lg:px-16 bg-brand-light text-brand-dark">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-16">
+            
+            <!-- Article 1 -->
+            <article class="group cursor-pointer slide-up flex flex-col">
+                <div class="img-hover-zoom aspect-[4/3] w-full mb-6 bg-brand-dark/5">
+                    <img src="images/hair_balayage_brunette.webp" alt="Color Maintenance" class="w-full h-full object-cover">
+                </div>
+                <div class="flex flex-col flex-grow">
+                    <div class="flex justify-between items-center text-[10px] text-brand-muted uppercase tracking-widest font-medium mb-3">
+                        <span>Color Theory</span>
+                        <span>4 Min Read</span>
+                    </div>
+                    <h3 class="font-serif text-2xl sm:text-3xl mb-3 group-hover:text-brand-green transition-colors leading-tight">Preserving Salon Radiance at Home</h3>
+                    <p class="text-sm text-brand-muted line-clamp-3 leading-relaxed mb-6">Learn the essential product regimens and washing rituals necessary to prevent oxidation and keep your bespoke color vibrant.</p>
+                </div>
+            </article>
+
+            <!-- Article 2 -->
+            <article class="group cursor-pointer slide-up delay-100 flex flex-col">
+                <div class="img-hover-zoom aspect-[4/3] w-full mb-6 bg-brand-dark/5">
+                    <img src="images/photo-1522337660859-02fbefca4702.webp" alt="Texture Styling" class="w-full h-full object-cover">
+                </div>
+                <div class="flex flex-col flex-grow">
+                    <div class="flex justify-between items-center text-[10px] text-brand-muted uppercase tracking-widest font-medium mb-3">
+                        <span>Trends & Styling</span>
+                        <span>5 Min Read</span>
+                    </div>
+                    <h3 class="font-serif text-2xl sm:text-3xl mb-3 group-hover:text-brand-green transition-colors leading-tight">Embracing Organic Texture</h3>
+                    <p class="text-sm text-brand-muted line-clamp-3 leading-relaxed mb-6">Move away from excessive heat. A guide to air-drying and diffusing techniques that celebrate your hair's natural architectural form.</p>
+                </div>
+            </article>
+
+            <!-- Article 3 -->
+            <article class="group cursor-pointer slide-up delay-200 flex flex-col">
+                <div class="img-hover-zoom aspect-[4/3] w-full mb-6 bg-brand-dark/5">
+                    <img src="images/botanical_scalp_ritual.webp" alt="Scalp Treatment" class="w-full h-full object-cover">
+                </div>
+                <div class="flex flex-col flex-grow">
+                    <div class="flex justify-between items-center text-[10px] text-brand-muted uppercase tracking-widest font-medium mb-3">
+                        <span>Scalp & Wellness</span>
+                        <span>3 Min Read</span>
+                    </div>
+                    <h3 class="font-serif text-2xl sm:text-3xl mb-3 group-hover:text-brand-green transition-colors leading-tight">The Foundation of Thicker Hair</h3>
+                    <p class="text-sm text-brand-muted line-clamp-3 leading-relaxed mb-6">Why true hair vitality begins at the cellular level, and how targeted scalp exfoliation transforms density and growth.</p>
+                </div>
+            </article>
+
+            <!-- Article 4 -->
+            <article class="group cursor-pointer slide-up flex flex-col">
+                <div class="img-hover-zoom aspect-[4/3] w-full mb-6 bg-brand-dark/5">
+                    <img src="images/stylist_precision_cut.webp" alt="Salon Tools" class="w-full h-full object-cover">
+                </div>
+                <div class="flex flex-col flex-grow">
+                    <div class="flex justify-between items-center text-[10px] text-brand-muted uppercase tracking-widest font-medium mb-3">
+                        <span>Inside Stackly</span>
+                        <span>6 Min Read</span>
+                    </div>
+                    <h3 class="font-serif text-2xl sm:text-3xl mb-3 group-hover:text-brand-green transition-colors leading-tight">The Anatomy of Our Shears</h3>
+                    <p class="text-sm text-brand-muted line-clamp-3 leading-relaxed mb-6">An intimate look at the bespoke Japanese steel tools our artisans use to construct structurally flawless haircuts.</p>
+                </div>
+            </article>
+
+            <!-- Article 5 -->
+            <article class="group cursor-pointer slide-up delay-100 flex flex-col">
+                <div class="img-hover-zoom aspect-[4/3] w-full mb-6 bg-brand-dark/5">
+                    <img src="images/editorial_hair_updo.webp" alt="Bold Styling" class="w-full h-full object-cover">
+                </div>
+                <div class="flex flex-col flex-grow">
+                    <div class="flex justify-between items-center text-[10px] text-brand-muted uppercase tracking-widest font-medium mb-3">
+                        <span>Trends & Styling</span>
+                        <span>4 Min Read</span>
+                    </div>
+                    <h3 class="font-serif text-2xl sm:text-3xl mb-3 group-hover:text-brand-green transition-colors leading-tight">The Return of the Blunt Bob</h3>
+                    <p class="text-sm text-brand-muted line-clamp-3 leading-relaxed mb-6">Sharp lines and unwavering structure. Exploring the season's most requested, high-impact silhouette.</p>
+                </div>
+            </article>
+
+            <!-- Article 6 -->
+            <article class="group cursor-pointer slide-up delay-200 flex flex-col">
+                <div class="img-hover-zoom aspect-[4/3] w-full mb-6 bg-brand-dark/5">
+                    <img src="images/luxury_hair_products.webp" alt="Clean Products" class="w-full h-full object-cover">
+                </div>
+                <div class="flex flex-col flex-grow">
+                    <div class="flex justify-between items-center text-[10px] text-brand-muted uppercase tracking-widest font-medium mb-3">
+                        <span>Scalp & Wellness</span>
+                        <span>5 Min Read</span>
+                    </div>
+                    <h3 class="font-serif text-2xl sm:text-3xl mb-3 group-hover:text-brand-green transition-colors leading-tight">Decoding Clean Chemistry</h3>
+                    <p class="text-sm text-brand-muted line-clamp-3 leading-relaxed mb-6">Understanding the real difference between silicones and plant-peptides in maintaining long-term hair elasticity.</p>
+                </div>
+            </article>
+        </div>
+
+        <div class="text-center mt-20 slide-up">
+            <button class="inline-flex items-center gap-3 border border-brand-dark px-10 py-4 hover:bg-brand-dark hover:text-brand-light transition-colors uppercase tracking-widest text-xs font-medium">
+                Load More Articles
+            </button>
+        </div>
+    </section>
+
+    <!-- NEW SECTION: Social Journal -->
+    <section class="py-20 sm:py-32 bg-[#1a1a1a] text-brand-light px-4 sm:px-8 lg:px-16 overflow-hidden">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+                <div>
+                    <p class="text-brand-accent text-xs font-bold uppercase tracking-widest mb-4">The Portfolio</p>
+                    <h2 class="font-serif text-4xl sm:text-5xl gsap-split-text-light leading-[1.1]">@StacklyAesthetics</h2>
+                </div>
+                <a href="404.html" class="inline-flex items-center gap-3 border-b border-brand-light/50 pb-1 text-brand-light/70 hover:text-brand-light hover:border-brand-light transition-colors uppercase tracking-widest text-xs font-medium">
+                    Follow Our Journey
+                </a>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="aspect-square w-full overflow-hidden slide-up group">
+                    <img src="images/photo-1580618672591-eb180b1a973f.webp" alt="Salon Chair" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700">
+                </div>
+                <div class="aspect-square w-full overflow-hidden slide-up delay-100 group">
+                    <img src="images/hair_gloss_treatment.webp" alt="Hair Styling" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700">
+                </div>
+                <div class="aspect-square w-full overflow-hidden slide-up delay-200 group">
+                    <img src="images/photo-1595959183082-7b570b7e08e2.webp" alt="Stylist Working" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700">
+                </div>
+                <div class="aspect-square w-full overflow-hidden slide-up delay-300 group">
+                    <img src="images/photo-1600948836101-f9ffda59d250.webp" alt="Salon Tools" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter Dedicated Section -->
+    <section class="py-20 sm:py-32 bg-brand-green text-brand-light px-4 sm:px-8 lg:px-16 text-center">
+        <div class="max-w-2xl mx-auto slide-up">
+            <div class="w-16 h-16 mx-auto border border-brand-light/20 rounded-full flex items-center justify-center mb-8">
+                <i class="ph ph-envelope-open text-2xl text-brand-accent"></i>
+            </div>
+            <h2 class="font-serif text-4xl sm:text-5xl lg:text-6xl mb-6 gsap-split-text-light leading-tight">Join The Inner Circle</h2>
+            <p class="text-brand-light/70 text-sm sm:text-base leading-relaxed mb-10 max-w-md mx-auto">
+                Receive our curated insights, seasonal trend reports, and priority booking access delivered directly to your inbox.
+            </p>
+            <form class="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-lg mx-auto" onsubmit="event.preventDefault();">
+                <input type="email" placeholder="Your Email Address" required class="bg-transparent border-b border-brand-light/30 outline-none w-full text-center sm:text-left py-3 text-sm placeholder-brand-light/50 font-serif focus:border-brand-light transition-colors">
+                <button type="submit" class="w-full sm:w-auto bg-brand-light text-brand-dark px-8 py-3 hover:bg-brand-accent hover:text-brand-dark transition-colors uppercase tracking-widest text-xs font-medium whitespace-nowrap mt-4 sm:mt-0">
+                    Subscribe
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-brand-dark text-brand-light pt-20 sm:pt-32 pb-10 px-4 sm:px-8 lg:px-16 border-t border-brand-light/10">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 sm:gap-16 mb-16">
+            
+            <div class="lg:col-span-1">
+                <a href="index.html" class="inline-block mb-6 hover:opacity-80 transition-opacity" title="Stackly Home">
+                    <img src="images/stackly logo.webp" alt="Stackly Aesthetics" class="h-9 sm:h-11 w-auto object-contain">
+                </a>
+                <p class="text-brand-light/70 text-sm mb-8 leading-relaxed max-w-xs">Setting the benchmark for sophisticated hair design and personalized aesthetic care in Salem.</p>
+                <div class="flex gap-4">
+                    <a href="404.html" class="w-10 h-10 rounded-full border border-brand-light/20 flex items-center justify-center hover:bg-brand-light hover:text-brand-dark transition-colors"><i class="ph-fill ph-instagram-logo"></i></a>
+                    <a href="404.html" class="w-10 h-10 rounded-full border border-brand-light/20 flex items-center justify-center hover:bg-brand-light hover:text-brand-dark transition-colors"><i class="ph-fill ph-pinterest-logo"></i></a>
+                    <a href="404.html" class="w-10 h-10 rounded-full border border-brand-light/20 flex items-center justify-center hover:bg-brand-light hover:text-brand-dark transition-colors"><i class="ph-fill ph-facebook-logo"></i></a>
+                </div>
+            </div>
+
+            <div>
+                <h4 class="font-serif text-xl sm:text-2xl mb-6">Explore</h4>
+                <ul class="space-y-4 text-sm text-brand-light/70">
+                    <li><a href="404.html" class="hover:text-white hover:translate-x-1 inline-block transition-transform">The Studio</a></li>
+                    <li><a href="404.html" class="hover:text-white hover:translate-x-1 inline-block transition-transform">Philosophy</a></li>
+                    <li><a href="404.html" class="hover:text-white hover:translate-x-1 inline-block transition-transform">Treatments Menu</a></li>
+                    <li><a href="404.html" class="hover:text-white hover:translate-x-1 inline-block transition-transform">Artisans</a></li>
+                </ul>
+            </div>
+            
+            <div>
+                <h4 class="font-serif text-xl sm:text-2xl mb-6">Connect</h4>
+                <ul class="space-y-4 text-sm text-brand-light/70">
+                    <li><a href="404.html" class="hover:text-white hover:translate-x-1 inline-block transition-transform">Request Appointment</a></li>
+                    <li><a href="404.html" class="hover:text-white hover:translate-x-1 inline-block transition-transform">Client Portal</a></li>
+                    <li><a href="404.html" class="hover:text-white hover:translate-x-1 inline-block transition-transform">Terms of Service</a></li>
+                    <li><a href="404.html" class="hover:text-white hover:translate-x-1 inline-block transition-transform">Privacy Policy</a></li>
+                </ul>
+            </div>
+
+            <div class="lg:col-span-1">
+                <h4 class="font-serif text-xl sm:text-2xl mb-6">Location</h4>
+                <p class="text-sm text-brand-light/70 mb-2 leading-relaxed">124 Styling Avenue</p>
+                <p class="text-sm text-brand-light/70 mb-6 leading-relaxed">Salem, Tamil Nadu 636001</p>
+                <p class="text-sm text-brand-light/70 mb-2 leading-relaxed"><a href="404.html" class="hover:underline">hello@stackly.in</a></p>
+                <p class="text-sm text-brand-light/70 leading-relaxed"><a href="404.html" class="hover:underline">+91 987 654 3210</a></p>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center pt-8 border-t border-brand-light/10 text-[10px] sm:text-xs text-brand-light/50 uppercase tracking-widest gap-4">
+            <p>&copy; 2026 STACKLY AESTHETICS.</p>
+            <a href="404.html" class="flex items-center gap-3 hover:text-white transition-colors group">
+                Return to Top
+                <div class="w-8 h-8 rounded-full border border-current flex items-center justify-center group-hover:-translate-y-1 transition-transform">
+                    <i class="ph ph-arrow-up"></i>
+                </div>
+            </a>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            gsap.registerPlugin(ScrollTrigger);
+
+            // --- Robust Text Split Animation Helper ---
+            function splitTextForAnimation(selector) {
+                const elements = document.querySelectorAll(selector);
+                elements.forEach(el => {
+                    const text = el.innerText;
+                    el.innerHTML = '';
+                    const words = text.split(/\s+/);
+                    words.forEach((word) => {
+                        if(word.trim() === '') return;
+                        const wordWrap = document.createElement('span');
+                        wordWrap.className = 'reveal-wrapper';
+                        const innerSpan = document.createElement('span');
+                        innerSpan.className = 'reveal-line';
+                        innerSpan.innerText = word + ' ';
+                        wordWrap.appendChild(innerSpan);
+                        el.appendChild(wordWrap);
+                    });
+                });
+            }
+
+            splitTextForAnimation('.gsap-split-text');
+            splitTextForAnimation('.gsap-split-text-light');
+
+            // --- Hero Animations ---
+            setTimeout(() => {
+                gsap.fromTo('.gsap-hero-text > span', 
+                    { opacity: 0, y: 50 },
+                    { opacity: 1, y: 0, duration: 1.5, stagger: 0.2, ease: "power4.out", delay: 0.1 }
+                );
+            }, 100);
+
+            // --- ScrollTrigger Text Reveal ---
+            const triggerClasses = ['.gsap-split-text', '.gsap-split-text-light'];
+            triggerClasses.forEach(cls => {
+                document.querySelectorAll(cls).forEach(triggerEl => {
+                    gsap.to(triggerEl.querySelectorAll('.reveal-line'), {
+                        scrollTrigger: {
+                            trigger: triggerEl,
+                            start: "top 90%",
+                        },
+                        y: '0%',
+                        opacity: 1,
+                        duration: 1,
+                        stagger: 0.04,
+                        ease: "power3.out"
+                    });
+                });
+            });
+
+            // --- Header & Filter Bar Scroll Effect ---
+            const header = document.getElementById('main-header');
+            const logo = document.getElementById('header-logo');
+            const menuBtn = document.getElementById('menu-btn');
+            const email = document.getElementById('header-email');
+            const loginBtn = document.getElementById('header-cta');
+            const filterBar = document.getElementById('filter-bar');
+            
+            // Adjust header based on scroll and dark sections
+            const logoImg = document.querySelector('#header-logo img');
+
+            window.addEventListener('scroll', () => {
+                const scrollY = window.scrollY;
+                
+                // Add shadow to sticky filter bar when scrolling past hero
+                if (filterBar) {
+                    if (scrollY > window.innerHeight * 0.9) {
+                        filterBar.classList.add('shadow-md', 'bg-brand-light/95', 'backdrop-blur-md');
+                    } else {
+                        filterBar.classList.remove('shadow-md', 'bg-brand-light/95', 'backdrop-blur-md');
+                    }
+                }
+
+                if (scrollY > 50) {
+                    header.classList.add('bg-brand-light/95', 'backdrop-blur-md', 'shadow-sm', 'py-2.5', 'sm:py-4');
+                    header.classList.remove('py-3', 'sm:py-6');
+                    
+                    // Inverse colors for light background
+                    if (logoImg) {
+                        logoImg.classList.add('logo-black');
+                        logoImg.style.filter = 'brightness(0)';
+                    }
+                    
+                    menuBtn.classList.remove('bg-white/10', 'text-brand-light', 'border-white/20');
+                    menuBtn.classList.add('bg-brand-dark', 'text-brand-light');
+                    
+                    if(email) {
+                        email.classList.remove('text-brand-light', 'drop-shadow-md');
+                        email.classList.add('text-brand-dark');
+                    }
+                    if(loginBtn) {
+                        loginBtn.classList.remove('text-brand-light', 'border-brand-light/50', 'bg-black/20');
+                        loginBtn.classList.add('text-brand-dark', 'border-brand-dark/30');
+                    }
+
+                } else {
+                    header.classList.add('py-3', 'sm:py-6');
+                    header.classList.remove('bg-brand-light/95', 'backdrop-blur-md', 'shadow-sm', 'py-2.5', 'sm:py-4');
+                    
+                    // Revert to dark theme settings for hero
+                    if (logoImg) {
+                        logoImg.classList.remove('logo-black');
+                        logoImg.style.filter = '';
+                    }
+
+                    menuBtn.classList.add('bg-white/10', 'text-brand-light', 'border-white/20');
+                    menuBtn.classList.remove('bg-brand-dark', 'text-brand-light');
+                    
+                    if(email) {
+                        email.classList.add('text-brand-light', 'drop-shadow-md');
+                        email.classList.remove('text-brand-dark');
+                    }
+                    if(loginBtn) {
+                        loginBtn.classList.add('text-brand-light', 'border-brand-light/50', 'bg-black/20');
+                        loginBtn.classList.remove('text-brand-dark', 'border-brand-dark/30');
+                    }
+                }
+            });
+
+            // --- Fullscreen Menu Toggle ---
+            const menuBtnEl = document.getElementById('menu-btn');
+            const closeBtn = document.getElementById('close-menu-btn');
+            const overlay = document.getElementById('menu-overlay');
+            const menuLinks = document.querySelectorAll('.menu-link');
+
+            function toggleMenu() {
+                overlay.classList.toggle('active');
+                if(overlay.classList.contains('active')) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    setTimeout(() => { document.body.style.overflow = ''; }, 700);
+                }
+            }
+
+            menuBtnEl.addEventListener('click', toggleMenu);
+            closeBtn.addEventListener('click', toggleMenu);
+            menuLinks.forEach(link => {
+                link.addEventListener('click', toggleMenu);
+            });
+
+            // --- Scroll Reveal Animations (.slide-up) ---
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target); 
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.slide-up').forEach(el => {
+                observer.observe(el);
+            });
+        });
+    </script>
+    <script src="validation.js"></script>
+</body>
+</html>

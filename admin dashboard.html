@@ -1,0 +1,1914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Stackly Aesthetics & Hair Studio</title>
+    <meta name="description" content="Stackly Studio Management - Oversee salon bookings, stylists, treatment menu, backbar inventory, client CRM, and revenue analytics.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        * { box-sizing: border-box; }
+        :root {
+            --bg: #0e0f12;
+            --panel: #14171d;
+            --panel-hover: #1a1e26;
+            --border: rgba(244, 243, 237, 0.08);
+            --border-hover: rgba(79, 89, 69, 0.5);
+            --text: #f4f3ed;
+            --muted: #9ca3af;
+            --olive: #4f5945;
+            --olive-light: #6e7c60;
+            --sage: #a3a99e;
+            --emerald: #10b981;
+            --blue: #3b82f6;
+            --amber: #f59e0b;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0a0b0e; }
+        ::-webkit-scrollbar-thumb { background: #2a2f3b; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4f5945; }
+
+        /* Sidebar */
+        .sidebar {
+            width: 255px;
+            height: 100vh;
+            background: var(--panel);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 50;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .sidebar-logo {
+            padding: 1.25rem 1.4rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255,255,255,0.01);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.65rem 1.1rem;
+            color: var(--muted);
+            font-size: 0.8rem;
+            font-weight: 500;
+            border-radius: 10px;
+            margin: 2px 0.6rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .nav-item:hover { background: rgba(79, 89, 69, 0.15); color: #fff; }
+        .nav-item.active {
+            background: var(--olive);
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(79, 89, 69, 0.35);
+        }
+        .nav-item.active i { color: #fff; }
+        .nav-item i { width: 18px; text-align: center; font-size: 0.9rem; }
+
+        /* Main Content Area */
+        .main-content {
+            margin-left: 255px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            width: calc(100% - 255px);
+        }
+
+        /* Top Bar */
+        .topbar {
+            height: 66px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            gap: 0.85rem;
+            background: rgba(14, 15, 18, 0.92);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+        }
+
+        /* Responsive Breakpoints & Mobile Enhancements */
+        @media (max-width: 1023px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); box-shadow: 0 0 40px rgba(0,0,0,0.8); z-index: 60; }
+            .main-content { margin-left: 0; width: 100%; max-width: 100vw; overflow-x: hidden; }
+            .mobile-overlay.show { display: block; z-index: 50; }
+        }
+
+        @media (max-width: 639px) {
+            .topbar {
+                padding: 0.5rem 0.75rem;
+                gap: 0.5rem;
+                height: 56px;
+            }
+            .stat-card {
+                padding: 0.85rem 1rem;
+            }
+            .panel-card {
+                padding: 0.85rem 1rem !important;
+            }
+        }
+
+        /* Stat Cards */
+        .stat-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 1.35rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 2px;
+            background: transparent;
+            transition: background 0.3s ease;
+        }
+        .stat-card:hover {
+            border-color: var(--border-hover);
+            background: var(--panel-hover);
+            transform: translateY(-2px);
+        }
+        .stat-card:hover::before {
+            background: linear-gradient(90deg, #4f5945, #a3a99e, #10b981);
+        }
+
+        /* Panel Card */
+        .panel-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            transition: all 0.3s ease;
+        }
+        .panel-card:hover { border-color: var(--border-hover); }
+
+        /* Badge */
+        .badge {
+            display: inline-flex; align-items: center;
+            padding: 0.25rem 0.65rem;
+            border-radius: 9999px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+        }
+        .badge-green { background: rgba(79, 89, 69, 0.25); color: #a3a99e; border: 1px solid rgba(79, 89, 69, 0.5); }
+        .badge-yellow { background: rgba(245,158,11,0.12); color: #f59e0b; border: 1px solid rgba(245,158,11,0.25); }
+        .badge-red { background: rgba(239,68,68,0.12); color: #ef4444; border: 1px solid rgba(239,68,68,0.25); }
+        .badge-blue { background: rgba(59,130,246,0.12); color: #60a5fa; border: 1px solid rgba(59,130,246,0.25); }
+        .badge-olive { background: rgba(79,89,69,0.3); color: #f4f3ed; border: 1px solid rgba(163,169,158,0.3); }
+
+        /* Table Responsiveness & Action Spacing */
+        .table-responsive {
+            width: 100% !important;
+            max-width: 100% !important;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        .data-table {
+            width: 100% !important;
+            min-width: 680px !important;
+            border-collapse: collapse;
+        }
+        .data-table th, .data-table td {
+            white-space: nowrap;
+        }
+        .action-btns-wrap {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem !important; /* Generous gap between edit and delete buttons */
+        }
+        .action-btns-wrap button + button {
+            margin-left: 0.5rem !important;
+        }
+        .data-table th {
+            text-align: left;
+            padding: 0.85rem 1rem;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #8b94a5;
+            border-bottom: 1px solid var(--border);
+            background: rgba(255,255,255,0.015);
+            white-space: nowrap;
+        }
+        .data-table td {
+            padding: 0.95rem 1rem;
+            font-size: 0.82rem;
+            border-bottom: 1px solid var(--border);
+            color: #d1d5db;
+        }
+        .data-table tr:last-child td { border-bottom: none; }
+        .data-table tbody tr { transition: background 0.2s ease; }
+        .data-table tbody tr:hover { background: rgba(79, 89, 69, 0.08); }
+
+        /* Search Input */
+        .search-input {
+            background: #14171e;
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 0.48rem 0.9rem 0.48rem 2.2rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            outline: none;
+            width: 200px;
+            transition: all 0.3s ease;
+        }
+        .search-input::placeholder { color: #5f687a; }
+        .search-input:focus { border-color: var(--olive); width: 250px; background: #1a1e27; box-shadow: 0 0 0 3px rgba(79, 89, 69, 0.2); }
+
+        /* Buttons */
+        .btn-primary {
+            background: var(--olive);
+            color: #f4f3ed;
+            padding: 0.55rem 1.15rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            white-space: nowrap;
+        }
+        .btn-primary:hover { background: #3e4636; transform: translateY(-1px); box-shadow: 0 4px 15px rgba(79, 89, 69, 0.35); }
+        
+        .btn-ghost {
+            background: rgba(255,255,255,0.02);
+            color: var(--muted);
+            padding: 0.5rem 0.85rem;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            white-space: nowrap;
+        }
+        .btn-ghost:hover { color: #fff; border-color: rgba(79,89,69,0.5); background: rgba(79,89,69,0.1); }
+
+        .btn-logout {
+            background: rgba(239, 68, 68, 0.08);
+            color: #f87171;
+            padding: 0.45rem 0.9rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+        }
+        .btn-logout:hover {
+            background: #ef4444;
+            color: #ffffff;
+            border-color: #ef4444;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+        }
+
+        .nav-section-label {
+            font-size: 0.58rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            color: #525a6b;
+            padding: 0.75rem 1.1rem 0.35rem;
+        }
+
+        .form-input {
+            width: 100%; background: #11141b; border: 1px solid var(--border);
+            color: #fff; border-radius: 10px; padding: 0.65rem 0.9rem;
+            font-size: 0.85rem; outline: none; transition: all 0.3s ease;
+        }
+        .form-input::placeholder { color: #4e5563; }
+        .form-input:focus { border-color: var(--olive); background: #161a23; box-shadow: 0 0 0 3px rgba(79, 89, 69, 0.2); }
+        .form-input.input-error { border-color: #ef4444 !important; background: rgba(239,68,68,0.04); }
+        .form-label { display: block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--sage); margin-bottom: 0.4rem; }
+        .error-msg { font-size: 0.7rem; color: #ef4444; margin-top: 0.3rem; display: none; }
+        .error-msg.show { display: block; }
+
+        .admin-section { display: none; }
+        .admin-section.active { display: block; }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-up { animation: fadeInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        .delay-1 { animation-delay: 0.05s; }
+        .delay-2 { animation-delay: 0.1s; }
+        .delay-3 { animation-delay: 0.15s; }
+
+        .mobile-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(4px);
+            z-index: 45;
+        }
+        .notif-dot {
+            width: 8px; height: 8px;
+            background: #f59e0b;
+            border-radius: 50%;
+            position: absolute;
+            top: 3px; right: 3px;
+            box-shadow: 0 0 8px rgba(245, 158, 11, 0.8);
+        }
+
+        .avatar {
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            background: #252b36;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem; font-weight: 700; color: #f4f3ed;
+            flex-shrink: 0;
+            border: 1px solid rgba(163, 169, 158, 0.3);
+        }
+
+        .tab-btn {
+            padding: 0.4rem 0.85rem;
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            background: transparent;
+            border: 1px solid transparent;
+        }
+        .tab-btn.active { color: #f4f3ed; background: rgba(79, 89, 69, 0.3); border-color: rgba(79, 89, 69, 0.5); }
+        .tab-btn:hover:not(.active) { color: #fff; background: rgba(255,255,255,0.04); }
+    </style>
+</head>
+<body>
+
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobile-overlay" onclick="closeSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <!-- Logo -->
+        <div class="sidebar-logo">
+            <a href="index.html" class="flex items-center gap-2 hover:opacity-80 transition-opacity" title="Return to Salon Website">
+                <img src="images/stackly logo.webp" alt="Stackly Logo" class="h-8 w-auto object-contain">
+            </a>
+            <button onclick="closeSidebar()" class="lg:hidden w-8 h-8 rounded-lg bg-white/5 text-gray-400 hover:text-white flex items-center justify-center transition-colors focus:outline-none text-sm">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Nav Links -->
+        <nav class="flex-1 overflow-y-auto py-3">
+            <div class="nav-section-label">Studio Command</div>
+            <a href="javascript:void(0)" class="nav-item active" id="nav-overview" onclick="switchSection('overview')">
+                <i class="fa-solid fa-chart-pie"></i> Dashboard Overview
+            </a>
+            <a href="javascript:void(0)" class="nav-item" id="nav-analytics" onclick="switchSection('analytics')">
+                <i class="fa-solid fa-chart-line"></i> Salon Analytics
+            </a>
+
+            <div class="nav-section-label mt-2">Operations & Menu</div>
+            <a href="javascript:void(0)" class="nav-item" id="nav-orders" onclick="switchSection('orders')">
+                <i class="fa-solid fa-calendar-check"></i> Bookings & Appointments
+                <span class="ml-auto badge badge-yellow">18</span>
+            </a>
+            <a href="javascript:void(0)" class="nav-item" id="nav-products" onclick="switchSection('products')">
+                <i class="fa-solid fa-scissors"></i> Treatment Menu & Retail
+                <span class="ml-auto badge badge-olive" id="nav-service-count">24</span>
+            </a>
+            <a href="javascript:void(0)" class="nav-item" id="nav-inventory" onclick="switchSection('inventory')">
+                <i class="fa-solid fa-pump-soap"></i> Backbar & Inventory
+            </a>
+            <a href="javascript:void(0)" class="nav-item" id="nav-categories" onclick="switchSection('categories')">
+                <i class="fa-solid fa-layer-group"></i> Service Categories
+            </a>
+
+            <div class="nav-section-label mt-2">Guests & Artisans</div>
+            <a href="javascript:void(0)" class="nav-item" id="nav-customers" onclick="switchSection('customers')">
+                <i class="fa-solid fa-users"></i> Salon Guests CRM
+            </a>
+            <a href="javascript:void(0)" class="nav-item" id="nav-reviews" onclick="switchSection('reviews')">
+                <i class="fa-solid fa-star"></i> Client Reviews
+                <span class="ml-auto badge badge-green">4.9★</span>
+            </a>
+
+            <div class="nav-section-label mt-2">Financials</div>
+            <a href="javascript:void(0)" class="nav-item" id="nav-revenue" onclick="switchSection('revenue')">
+                <i class="fa-solid fa-indian-rupee-sign"></i> Revenue Ledger
+            </a>
+            <a href="javascript:void(0)" class="nav-item" id="nav-invoices" onclick="switchSection('invoices')">
+                <i class="fa-solid fa-file-invoice"></i> Guest Invoices
+            </a>
+
+            <div class="nav-section-label mt-2">Studio System</div>
+            <a href="javascript:void(0)" class="nav-item" id="nav-settings" onclick="switchSection('settings')">
+                <i class="fa-solid fa-sliders"></i> Studio Settings
+            </a>
+            <a href="javascript:void(0)" class="nav-item" id="nav-support" onclick="switchSection('support')">
+                <i class="fa-solid fa-comments"></i> Inquiries & Consultations
+                <span class="ml-auto badge badge-blue">3</span>
+            </a>
+            <a href="login.html" class="nav-item text-red-400 hover:text-white hover:bg-red-500/20 transition-all mt-1">
+                <i class="fa-solid fa-right-from-bracket text-red-400"></i> Sign Out
+            </a>
+        </nav>
+
+        <!-- Sidebar Footer -->
+        <div class="border-t border-white/10 p-3.5 bg-[#0a0c10]">
+            <div class="flex items-center gap-3">
+                <div class="avatar bg-brand-green text-white font-serif admin-avatar-initial" id="admin-avatar-sidebar">D</div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-xs font-semibold truncate text-white" id="admin-name">Elias Vance</div>
+                    <div class="text-[10px] text-gray-400 truncate" id="admin-email">director@stackly.in</div>
+                </div>
+                <button onclick="confirmAdminLogout(event)" title="Sign Out of Stackly Studio" class="w-8 h-8 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all text-xs border-none cursor-pointer">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content" id="main-content">
+
+        <!-- Top Bar -->
+        <header class="topbar">
+            <!-- Mobile Sidebar Toggle -->
+            <button onclick="toggleSidebar()" class="lg:hidden p-2 text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg transition-colors focus:outline-none flex-shrink-0 cursor-pointer" aria-label="Toggle navigation">
+                <i class="fa-solid fa-bars text-sm"></i>
+            </button>
+            <a href="index.html" class="lg:hidden flex items-center mx-2 hover:opacity-80 transition-opacity" title="Stackly Home">
+                <img src="images/stackly logo.webp" alt="Stackly Logo" class="h-6 w-auto object-contain">
+            </a>
+            
+            <div class="text-xs sm:text-sm font-semibold truncate text-brand-light font-serif flex-1 min-w-0" id="topbar-title">Studio Dashboard Overview</div>
+
+            <div class="hidden xl:flex items-center gap-6 ml-6 text-xs text-brand-muted">
+                <a href="index.html" class="hover:text-brand-light transition-colors">Live Studio Website</a>
+                <a href="services.html" class="hover:text-brand-light transition-colors">Treatments</a>
+                <a href="blog.html" class="hover:text-brand-light transition-colors">Journal</a>
+            </div>
+
+            <div class="ml-auto flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+                <!-- Search Bar -->
+                <div class="relative hidden md:block">
+                    <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                    <input type="text" id="global-admin-search" oninput="handleGlobalSearch()" onkeydown="if(event.key==='Enter') handleGlobalSearchSubmit(event)" class="search-input" placeholder="Search guests, treatments, formulas...">
+                </div>
+
+                <!-- Notifications -->
+                <button class="relative p-2 sm:p-2.5 text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 rounded-full transition-colors focus:outline-none cursor-pointer flex-shrink-0" onclick="showNotif()" title="Studio Telemetry">
+                    <i class="fa-solid fa-bell text-xs sm:text-sm"></i>
+                    <span class="notif-dot"></span>
+                </button>
+
+                <!-- Quick Action Button -->
+                <button onclick="openAddProductModal()" class="btn-primary text-xs hidden sm:inline-flex cursor-pointer">
+                    <i class="fa-solid fa-plus text-xs"></i> New Treatment
+                </button>
+
+                <!-- Logout Button -->
+                <button onclick="confirmAdminLogout(event)" class="btn-logout hidden md:inline-flex cursor-pointer" title="Sign Out">
+                    <i class="fa-solid fa-right-from-bracket text-xs"></i>
+                    <span>Sign Out</span>
+                </button>
+
+                <!-- User Dropdown Menu -->
+                <div class="relative" id="profile-dropdown-container">
+                    <button onclick="toggleProfileDropdown(event)" class="flex items-center gap-1.5 p-1 pr-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-colors focus:outline-none cursor-pointer">
+                        <div class="avatar bg-brand-green text-white font-serif text-xs admin-avatar-initial" id="admin-avatar-top">D</div>
+                        <span class="text-xs font-medium hidden xl:inline text-gray-200" id="admin-name-top">Elias Vance</span>
+                        <i class="fa-solid fa-chevron-down text-[9px] text-gray-400"></i>
+                    </button>
+
+                    <!-- Dropdown Content -->
+                    <div id="profile-dropdown-menu" class="hidden absolute right-0 mt-2 w-56 rounded-xl bg-[#141720] border border-white/15 shadow-2xl p-2 z-50">
+                        <div class="px-3 py-2 border-b border-white/10 mb-1">
+                            <div class="text-xs font-bold text-white truncate" id="admin-dropdown-name">Elias Vance</div>
+                            <div class="text-[11px] text-gray-400 truncate" id="admin-dropdown-email">director@stackly.in</div>
+                            <span class="inline-block mt-1 badge badge-green text-[9px]">Creative Director</span>
+                        </div>
+                        <a href="javascript:void(0)" onclick="switchSection('settings'); hideProfileDropdown();" class="flex items-center gap-2.5 px-3 py-2 text-xs text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+                            <i class="fa-solid fa-sliders text-gray-400"></i> Studio Operations
+                        </a>
+                        <a href="javascript:void(0)" onclick="switchSection('revenue'); hideProfileDropdown();" class="flex items-center gap-2.5 px-3 py-2 text-xs text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+                            <i class="fa-solid fa-indian-rupee-sign text-gray-400"></i> Revenue Ledger
+                        </a>
+                        <a href="index.html" class="flex items-center gap-2.5 px-3 py-2 text-xs text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+                            <i class="fa-solid fa-arrow-up-right-from-square text-gray-400"></i> View Live Studio
+                        </a>
+                        <div class="border-t border-white/10 my-1"></div>
+                        <a href="javascript:void(0)" onclick="confirmAdminLogout(event); hideProfileDropdown();" class="flex items-center gap-2.5 px-3 py-2 text-xs text-red-400 hover:bg-red-500/15 rounded-lg transition-colors font-semibold cursor-pointer">
+                            <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Content Container -->
+        <div class="p-3 sm:p-5 md:p-6 flex-1 w-full max-w-[1600px] mx-auto">
+
+            <!-- ================= SECTION: OVERVIEW ================= -->
+            <div id="sec-overview" class="admin-section active">
+                <!-- KPI Stat Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+                    <div class="stat-card fade-up">
+                        <div class="flex items-center justify-between text-xs text-brand-accent uppercase tracking-wider font-semibold mb-2">
+                            <span>Today's Revenue</span>
+                            <i class="fa-solid fa-indian-rupee-sign text-brand-accent"></i>
+                        </div>
+                        <div class="text-2xl sm:text-3xl font-serif text-white">₹68,500</div>
+                        <div class="text-xs text-emerald-400 mt-2 flex items-center gap-1 font-medium">
+                            <i class="fa-solid fa-arrow-trend-up"></i> +14.2% vs yesterday
+                        </div>
+                    </div>
+
+                    <div class="stat-card fade-up delay-1 cursor-pointer" onclick="switchSection('orders')">
+                        <div class="flex items-center justify-between text-xs text-brand-accent uppercase tracking-wider font-semibold mb-2">
+                            <span>Appointments Today</span>
+                            <i class="fa-solid fa-calendar-days text-brand-accent"></i>
+                        </div>
+                        <div class="text-2xl sm:text-3xl font-serif text-white">18 Bookings</div>
+                        <div class="text-xs text-brand-muted mt-2">6 In-Chair &bull; 8 Confirmed &bull; 4 Done</div>
+                    </div>
+
+                    <div class="stat-card fade-up delay-2">
+                        <div class="flex items-center justify-between text-xs text-brand-accent uppercase tracking-wider font-semibold mb-2">
+                            <span>Chair Utilization</span>
+                            <i class="fa-solid fa-chair text-brand-accent"></i>
+                        </div>
+                        <div class="text-2xl sm:text-3xl font-serif text-white">92% Capacity</div>
+                        <div class="text-xs text-emerald-400 mt-2 font-medium">6 of 6 Active Stations Running</div>
+                    </div>
+
+                    <div class="stat-card fade-up delay-3">
+                        <div class="flex items-center justify-between text-xs text-brand-accent uppercase tracking-wider font-semibold mb-2">
+                            <span>Stylists On Floor</span>
+                            <i class="fa-solid fa-wand-magic-sparkles text-brand-accent"></i>
+                        </div>
+                        <div class="text-2xl sm:text-3xl font-serif text-white">6 Artisans</div>
+                        <div class="text-xs text-brand-muted mt-2">Julian, Elena, Marcus, Priya + 2</div>
+                    </div>
+                </div>
+
+                <!-- Charts Row -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                    <!-- Main Revenue Chart -->
+                    <div class="panel-card p-5 lg:col-span-2 flex flex-col justify-between">
+                        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                            <div>
+                                <h3 class="font-serif text-lg text-white">Studio Revenue Velocity</h3>
+                                <p class="text-xs text-gray-400">Monthly booking gross across color, cuts & scalp treatments</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button class="tab-btn active" id="tab-monthly" onclick="switchChartTimeframe('monthly', this)">Monthly</button>
+                                <button class="tab-btn" id="tab-yearly" onclick="switchChartTimeframe('yearly', this)">Annual</button>
+                                <button class="tab-btn" id="tab-rev-mode" onclick="toggleMetric('revenue', this)">₹ Revenue</button>
+                                <button class="tab-btn" id="tab-ord-mode" onclick="toggleMetric('bookings', this)">Bookings</button>
+                            </div>
+                        </div>
+                        <div class="h-64 sm:h-72 w-full relative">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Category Breakdown Doughnut -->
+                    <div class="panel-card p-5 flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-serif text-lg text-white mb-1">Service Revenue Mix</h3>
+                            <p class="text-xs text-gray-400 mb-4">Contribution by treatment classification</p>
+                        </div>
+                        <div class="h-56 relative flex items-center justify-center">
+                            <canvas id="categoryDoughnutChart"></canvas>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-xs pt-4 border-t border-white/5 mt-2">
+                            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#4f5945]"></span><span>Balayage & Color (45%)</span></div>
+                            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#a3a99e]"></span><span>Precision Cuts (28%)</span></div>
+                            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#10b981]"></span><span>Scalp Therapy (18%)</span></div>
+                            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#f59e0b]"></span><span>Retail Care (9%)</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Appointments Table & Stylist Roster -->
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                    <!-- Recent Bookings Table -->
+                    <div class="panel-card p-5 xl:col-span-2">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="font-serif text-lg text-white">Live Chair Queue & Recent Bookings</h3>
+                                <p class="text-xs text-gray-400">Current guest treatments and appointment arrivals</p>
+                            </div>
+                            <button onclick="switchSection('orders')" class="btn-ghost text-xs">View All (18)</button>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Guest</th>
+                                        <th>Treatment</th>
+                                        <th>Artisan</th>
+                                        <th>Time / Station</th>
+                                        <th>Status</th>
+                                        <th>Fee</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="font-semibold text-white">Aditi Sharma</td>
+                                        <td>Bespoke Balayage & Gloss</td>
+                                        <td class="text-brand-accent">Elena Moreau</td>
+                                        <td>11:00 AM &bull; Station 1</td>
+                                        <td><span class="badge badge-yellow">In-Chair</span></td>
+                                        <td class="font-bold text-white">₹6,500</td>
+                                        <td><button class="btn-ghost py-1 px-2.5 text-xs" onclick="viewBookingDetails('Aditi Sharma', 'Bespoke Balayage')">Manage</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-semibold text-white">Priya Sundaram</td>
+                                        <td>The Signature Cut & Blowout</td>
+                                        <td class="text-brand-accent">Julian Reyes</td>
+                                        <td>11:30 AM &bull; Station 2</td>
+                                        <td><span class="badge badge-yellow">In-Chair</span></td>
+                                        <td class="font-bold text-white">₹2,500</td>
+                                        <td><button class="btn-ghost py-1 px-2.5 text-xs" onclick="viewBookingDetails('Priya Sundaram', 'The Signature Cut')">Manage</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-semibold text-white">Meera Krishnan</td>
+                                        <td>Scalp Detoxification Ritual</td>
+                                        <td class="text-brand-accent">Marcus Chen</td>
+                                        <td>01:00 PM &bull; Station 3</td>
+                                        <td><span class="badge badge-green">Confirmed</span></td>
+                                        <td class="font-bold text-white">₹1,800</td>
+                                        <td><button class="btn-ghost py-1 px-2.5 text-xs" onclick="viewBookingDetails('Meera Krishnan', 'Scalp Detoxification')">Manage</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-semibold text-white">Ananya Iyer</td>
+                                        <td>The Complete Canvas</td>
+                                        <td class="text-brand-accent">Elena Moreau</td>
+                                        <td>02:30 PM &bull; Station 1</td>
+                                        <td><span class="badge badge-green">Confirmed</span></td>
+                                        <td class="font-bold text-white">₹9,500</td>
+                                        <td><button class="btn-ghost py-1 px-2.5 text-xs" onclick="viewBookingDetails('Ananya Iyer', 'The Complete Canvas')">Manage</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-semibold text-white">Kavita Nair</td>
+                                        <td>Bond Repair Ritual</td>
+                                        <td class="text-brand-accent">Priya Sharma</td>
+                                        <td>09:30 AM &bull; Station 4</td>
+                                        <td><span class="badge badge-olive">Completed</span></td>
+                                        <td class="font-bold text-white">₹2,500</td>
+                                        <td><button class="btn-ghost py-1 px-2.5 text-xs" onclick="viewBookingDetails('Kavita Nair', 'Bond Repair')">Receipt</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Stylist Floor Roster -->
+                    <div class="panel-card p-5">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-serif text-lg text-white">Floor Artisan Roster</h3>
+                            <span class="badge badge-green">6 Active</span>
+                        </div>
+                        <div class="space-y-3.5">
+                            <div class="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5">
+                                <div class="flex items-center gap-3">
+                                    <div class="avatar bg-[#4f5945]">JR</div>
+                                    <div>
+                                        <div class="text-xs font-bold text-white">Julian Reyes</div>
+                                        <div class="text-[11px] text-brand-muted">Structural Cut Lead &bull; Station 2</div>
+                                    </div>
+                                </div>
+                                <span class="badge badge-yellow">In-Session</span>
+                            </div>
+
+                            <div class="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5">
+                                <div class="flex items-center gap-3">
+                                    <div class="avatar bg-[#4f5945]">EM</div>
+                                    <div>
+                                        <div class="text-xs font-bold text-white">Elena Moreau</div>
+                                        <div class="text-[11px] text-brand-muted">Balayage Specialist &bull; Station 1</div>
+                                    </div>
+                                </div>
+                                <span class="badge badge-yellow">In-Session</span>
+                            </div>
+
+                            <div class="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5">
+                                <div class="flex items-center gap-3">
+                                    <div class="avatar bg-[#4f5945]">MC</div>
+                                    <div>
+                                        <div class="text-xs font-bold text-white">Marcus Chen</div>
+                                        <div class="text-[11px] text-brand-muted">Trichology & Scalp &bull; Station 3</div>
+                                    </div>
+                                </div>
+                                <span class="badge badge-green">Available</span>
+                            </div>
+
+                            <div class="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5">
+                                <div class="flex items-center gap-3">
+                                    <div class="avatar bg-[#4f5945]">PS</div>
+                                    <div>
+                                        <div class="text-xs font-bold text-white">Priya Sharma</div>
+                                        <div class="text-[11px] text-brand-muted">Texture & Glaze &bull; Station 4</div>
+                                    </div>
+                                </div>
+                                <span class="badge badge-green">Available</span>
+                            </div>
+                        </div>
+
+                        <!-- Quick Barcode / Salon Inventory Alert -->
+                        <div class="mt-5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-between">
+                            <div class="flex items-center gap-2.5 text-xs text-amber-300">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                                <span>Olaplex No. 2 Backbar Low (2 units)</span>
+                            </div>
+                            <button onclick="switchSection('inventory')" class="btn-ghost py-1 px-2 text-[10px] text-amber-200 border-amber-500/30">Restock</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= SECTION: ORDERS / BOOKINGS ================= -->
+            <div id="sec-orders" class="admin-section">
+                <div class="panel-card p-5 mb-6">
+                    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                        <div>
+                            <h2 class="font-serif text-2xl text-white">Salon Appointments & Bookings</h2>
+                            <p class="text-xs text-gray-400">Complete appointment ledger with station assignments and status tracking</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn-primary" onclick="openAddBookingModal()"><i class="fa-solid fa-plus"></i> New Appointment</button>
+                        </div>
+                    </div>
+
+                    <!-- Filter buttons -->
+                    <div class="flex gap-2 mb-4 overflow-x-auto pb-2">
+                        <button class="tab-btn active" onclick="filterBookings('all', this)">All (18)</button>
+                        <button class="tab-btn" onclick="filterBookings('In-Chair', this)">In-Chair (2)</button>
+                        <button class="tab-btn" onclick="filterBookings('Confirmed', this)">Confirmed (10)</button>
+                        <button class="tab-btn" onclick="filterBookings('Completed', this)">Completed (5)</button>
+                        <button class="tab-btn" onclick="filterBookings('Rescheduled', this)">Rescheduled (1)</button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="data-table" id="bookings-table">
+                            <thead>
+                                <tr>
+                                    <th>Ref ID</th>
+                                    <th>Client Name</th>
+                                    <th>Treatment</th>
+                                    <th>Assigned Artisan</th>
+                                    <th>Date & Slot</th>
+                                    <th>Station</th>
+                                    <th>Status</th>
+                                    <th>Amount</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr data-status="In-Chair">
+                                    <td class="font-mono text-xs text-brand-muted">STK-BK-8901</td>
+                                    <td class="font-bold text-white">Aditi Sharma</td>
+                                    <td>Bespoke Balayage</td>
+                                    <td class="text-brand-accent">Elena Moreau</td>
+                                    <td>Today &bull; 11:00 AM</td>
+                                    <td>Station 1</td>
+                                    <td><span class="badge badge-yellow">In-Chair</span></td>
+                                    <td class="font-bold text-white">₹6,500</td>
+                                    <td><button class="btn-ghost py-1 px-2.5 text-xs" onclick="showBookingAction('Aditi Sharma')">Actions</button></td>
+                                </tr>
+                                <tr data-status="In-Chair">
+                                    <td class="font-mono text-xs text-brand-muted">STK-BK-8902</td>
+                                    <td class="font-bold text-white">Priya Sundaram</td>
+                                    <td>The Signature Cut</td>
+                                    <td class="text-brand-accent">Julian Reyes</td>
+                                    <td>Today &bull; 11:30 AM</td>
+                                    <td>Station 2</td>
+                                    <td><span class="badge badge-yellow">In-Chair</span></td>
+                                    <td class="font-bold text-white">₹2,500</td>
+                                    <td><button class="btn-ghost py-1 px-2.5 text-xs" onclick="showBookingAction('Priya Sundaram')">Actions</button></td>
+                                </tr>
+                                <tr data-status="Confirmed">
+                                    <td class="font-mono text-xs text-brand-muted">STK-BK-8903</td>
+                                    <td class="font-bold text-white">Meera Krishnan</td>
+                                    <td>Scalp Detoxification</td>
+                                    <td class="text-brand-accent">Marcus Chen</td>
+                                    <td>Today &bull; 01:00 PM</td>
+                                    <td>Station 3</td>
+                                    <td><span class="badge badge-green">Confirmed</span></td>
+                                    <td class="font-bold text-white">₹1,800</td>
+                                    <td><button class="btn-ghost py-1 px-2.5 text-xs" onclick="showBookingAction('Meera Krishnan')">Actions</button></td>
+                                </tr>
+                                <tr data-status="Confirmed">
+                                    <td class="font-mono text-xs text-brand-muted">STK-BK-8904</td>
+                                    <td class="font-bold text-white">Ananya Iyer</td>
+                                    <td>The Complete Canvas</td>
+                                    <td class="text-brand-accent">Elena Moreau</td>
+                                    <td>Today &bull; 02:30 PM</td>
+                                    <td>Station 1</td>
+                                    <td><span class="badge badge-green">Confirmed</span></td>
+                                    <td class="font-bold text-white">₹9,500</td>
+                                    <td><button class="btn-ghost py-1 px-2.5 text-xs" onclick="showBookingAction('Ananya Iyer')">Actions</button></td>
+                                </tr>
+                                <tr data-status="Confirmed">
+                                    <td class="font-mono text-xs text-brand-muted">STK-BK-8905</td>
+                                    <td class="font-bold text-white">Sneha Reddy</td>
+                                    <td>Liquid Glass Mask</td>
+                                    <td class="text-brand-accent">Priya Sharma</td>
+                                    <td>Today &bull; 04:00 PM</td>
+                                    <td>Station 4</td>
+                                    <td><span class="badge badge-green">Confirmed</span></td>
+                                    <td class="font-bold text-white">₹1,500</td>
+                                    <td><button class="btn-ghost py-1 px-2.5 text-xs" onclick="showBookingAction('Sneha Reddy')">Actions</button></td>
+                                </tr>
+                                <tr data-status="Completed">
+                                    <td class="font-mono text-xs text-brand-muted">STK-BK-8898</td>
+                                    <td class="font-bold text-white">Kavita Nair</td>
+                                    <td>Bond Repair Ritual</td>
+                                    <td class="text-brand-accent">Marcus Chen</td>
+                                    <td>Today &bull; 09:30 AM</td>
+                                    <td>Station 3</td>
+                                    <td><span class="badge badge-olive">Completed</span></td>
+                                    <td class="font-bold text-white">₹2,500</td>
+                                    <td><button class="btn-ghost py-1 px-2.5 text-xs" onclick="showBookingAction('Kavita Nair')">Receipt</button></td>
+                                </tr>
+                                <tr data-status="Completed">
+                                    <td class="font-mono text-xs text-brand-muted">STK-BK-8895</td>
+                                    <td class="font-bold text-white">Rhea Kapoor</td>
+                                    <td>Essential Blowout</td>
+                                    <td class="text-brand-accent">Julian Reyes</td>
+                                    <td>Today &bull; 10:00 AM</td>
+                                    <td>Station 2</td>
+                                    <td><span class="badge badge-olive">Completed</span></td>
+                                    <td class="font-bold text-white">₹1,200</td>
+                                    <td><button class="btn-ghost py-1 px-2.5 text-xs" onclick="showBookingAction('Rhea Kapoor')">Receipt</button></td>
+                                </tr>
+                                <tr data-status="Rescheduled">
+                                    <td class="font-mono text-xs text-brand-muted">STK-BK-8890</td>
+                                    <td class="font-bold text-white">Divya Prakash</td>
+                                    <td>Global Color</td>
+                                    <td class="text-brand-accent">Elena Moreau</td>
+                                    <td>Tomorrow &bull; 03:00 PM</td>
+                                    <td>Station 1</td>
+                                    <td><span class="badge badge-blue">Rescheduled</span></td>
+                                    <td class="font-bold text-white">₹4,500</td>
+                                    <td><button class="btn-ghost py-1 px-2.5 text-xs" onclick="showBookingAction('Divya Prakash')">Adjust</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= SECTION: PRODUCTS / TREATMENT MENU ================= -->
+            <div id="sec-products" class="admin-section">
+                <div class="panel-card p-5 mb-6">
+                    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                        <div>
+                            <h2 class="font-serif text-2xl text-white">Salon Treatment Menu & Retail Care</h2>
+                            <p class="text-xs text-gray-400">Curated salon service offerings, duration standards and boutique formulations</p>
+                        </div>
+                        <button class="btn-primary" onclick="openAddProductModal()"><i class="fa-solid fa-plus"></i> Add Service / Product</button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="data-table" id="products-table">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Name</th>
+                                    <th>Classification</th>
+                                    <th>Price</th>
+                                    <th>Duration / Stock</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="font-mono text-xs text-brand-muted">STK-SRV-01</td>
+                                    <td class="font-bold text-white">The Signature Cut</td>
+                                    <td><span class="badge badge-olive">Structural Cutting</span></td>
+                                    <td class="font-bold text-white">₹2,500</td>
+                                    <td>60 mins</td>
+                                    <td><span class="badge badge-green">Active</span></td>
+                                    <td>
+                                        <div class="action-btns-wrap">
+                                            <button class="btn-ghost text-xs py-1 px-2.5 hover:text-white" onclick="editProductRow('The Signature Cut')" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                                            <button class="btn-ghost text-xs py-1 px-2.5 text-red-400 hover:bg-red-500/20" onclick="deleteProductRow(this)" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="font-mono text-xs text-brand-muted">STK-SRV-02</td>
+                                    <td class="font-bold text-white">Bespoke Balayage</td>
+                                    <td><span class="badge badge-olive">Color Architecture</span></td>
+                                    <td class="font-bold text-white">₹6,500</td>
+                                    <td>180 mins</td>
+                                    <td><span class="badge badge-green">Active</span></td>
+                                    <td>
+                                        <div class="action-btns-wrap">
+                                            <button class="btn-ghost text-xs py-1 px-2.5 hover:text-white" onclick="editProductRow('Bespoke Balayage')" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                                            <button class="btn-ghost text-xs py-1 px-2.5 text-red-400 hover:bg-red-500/20" onclick="deleteProductRow(this)" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="font-mono text-xs text-brand-muted">STK-SRV-03</td>
+                                    <td class="font-bold text-white">Scalp Detoxification</td>
+                                    <td><span class="badge badge-olive">Cellular Therapy</span></td>
+                                    <td class="font-bold text-white">₹1,800</td>
+                                    <td>45 mins</td>
+                                    <td><span class="badge badge-green">Active</span></td>
+                                    <td>
+                                        <div class="action-btns-wrap">
+                                            <button class="btn-ghost text-xs py-1 px-2.5 hover:text-white" onclick="editProductRow('Scalp Detoxification')" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                                            <button class="btn-ghost text-xs py-1 px-2.5 text-red-400 hover:bg-red-500/20" onclick="deleteProductRow(this)" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="font-mono text-xs text-brand-muted">STK-SRV-04</td>
+                                    <td class="font-bold text-white">The Complete Canvas</td>
+                                    <td><span class="badge badge-olive">Signature Experience</span></td>
+                                    <td class="font-bold text-white">₹9,500</td>
+                                    <td>270 mins</td>
+                                    <td><span class="badge badge-green">Active</span></td>
+                                    <td>
+                                        <div class="action-btns-wrap">
+                                            <button class="btn-ghost text-xs py-1 px-2.5 hover:text-white" onclick="editProductRow('The Complete Canvas')" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                                            <button class="btn-ghost text-xs py-1 px-2.5 text-red-400 hover:bg-red-500/20" onclick="deleteProductRow(this)" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="font-mono text-xs text-brand-muted">STK-RTL-01</td>
+                                    <td class="font-bold text-white">Olaplex No. 3 Hair Perfector (100ml)</td>
+                                    <td><span class="badge badge-blue">Boutique Retail</span></td>
+                                    <td class="font-bold text-white">₹2,950</td>
+                                    <td>14 in stock</td>
+                                    <td><span class="badge badge-green">In Stock</span></td>
+                                    <td>
+                                        <div class="action-btns-wrap">
+                                            <button class="btn-ghost text-xs py-1 px-2.5 hover:text-white" onclick="editProductRow('Olaplex No. 3')" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                                            <button class="btn-ghost text-xs py-1 px-2.5 text-red-400 hover:bg-red-500/20" onclick="deleteProductRow(this)" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="font-mono text-xs text-brand-muted">STK-RTL-02</td>
+                                    <td class="font-bold text-white">Oribe Gold Lust Nourishing Hair Oil</td>
+                                    <td><span class="badge badge-blue">Boutique Retail</span></td>
+                                    <td class="font-bold text-white">₹3,800</td>
+                                    <td>8 in stock</td>
+                                    <td><span class="badge badge-green">In Stock</span></td>
+                                    <td>
+                                        <div class="action-btns-wrap">
+                                            <button class="btn-ghost text-xs py-1 px-2.5 hover:text-white" onclick="editProductRow('Oribe Gold Lust')" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                                            <button class="btn-ghost text-xs py-1 px-2.5 text-red-400 hover:bg-red-500/20" onclick="deleteProductRow(this)" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= SECTION: INVENTORY ================= -->
+            <div id="sec-inventory" class="admin-section">
+                <div class="panel-card p-5 mb-6">
+                    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                        <div>
+                            <h2 class="font-serif text-2xl text-white">Salon Backbar & Chemical Dispensary</h2>
+                            <p class="text-xs text-gray-400">Stock levels for color formulations, developers, bond rebuilders and treatment masks</p>
+                        </div>
+                        <button class="btn-primary" onclick="window.location.href='404.html'"><i class="fa-solid fa-cart-shopping"></i> Quick Dispensary Reorder</button>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
+                        <div class="p-4 rounded-xl bg-white/5 border border-white/5">
+                            <span class="text-xs text-gray-400 uppercase font-semibold">Total Inventory SKU</span>
+                            <div class="text-2xl font-serif text-white mt-1">48 Formulations</div>
+                        </div>
+                        <div class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                            <span class="text-xs text-amber-300 uppercase font-semibold">Low Stock Threshold</span>
+                            <div class="text-2xl font-serif text-amber-200 mt-1">3 Items Critical</div>
+                        </div>
+                        <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                            <span class="text-xs text-emerald-300 uppercase font-semibold">Estimated Dispensary Value</span>
+                            <div class="text-2xl font-serif text-emerald-200 mt-1">₹3,45,000</div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Product / Chemical Formula</th>
+                                    <th>Supplier</th>
+                                    <th>Location</th>
+                                    <th>Quantity Remaining</th>
+                                    <th>Threshold</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="font-bold text-white">Olaplex No. 1 Bond Multiplier (525ml)</td>
+                                    <td>Beauty Pro India</td>
+                                    <td>Color Bar Station 1</td>
+                                    <td class="font-semibold text-amber-400">2 bottles</td>
+                                    <td>3 bottles</td>
+                                    <td><span class="badge badge-yellow">Low Stock</span></td>
+                                    <td><button class="btn-ghost py-1 px-2.5 text-xs" onclick="window.location.href='404.html'">Reorder</button></td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold text-white">Wella Illumina 8/69 Soft Ash (60ml)</td>
+                                    <td>Wella Professional</td>
+                                    <td>Color Drawer A4</td>
+                                    <td class="font-semibold text-white">18 tubes</td>
+                                    <td>5 tubes</td>
+                                    <td><span class="badge badge-green">Healthy</span></td>
+                                    <td><button class="btn-ghost py-1 px-2.5 text-xs" onclick="window.location.href='404.html'">Audit</button></td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold text-white">Blonde Multi-Techniques Powder (9-Lift)</td>
+                                    <td>L'Oreal Professional</td>
+                                    <td>Dispensary Shelf B</td>
+                                    <td class="font-semibold text-red-400">1 tub (500g)</td>
+                                    <td>2 tubs</td>
+                                    <td><span class="badge badge-red">Critical</span></td>
+                                    <td><button class="btn-ghost py-1 px-2.5 text-xs" onclick="window.location.href='404.html'">Express Reorder</button></td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold text-white">Davines Purifying Scalp Cleanser (1000ml)</td>
+                                    <td>Davines India</td>
+                                    <td>Wash Basin Station</td>
+                                    <td class="font-semibold text-white">6 liters</td>
+                                    <td>2 liters</td>
+                                    <td><span class="badge badge-green">Healthy</span></td>
+                                    <td><button class="btn-ghost py-1 px-2.5 text-xs" onclick="window.location.href='404.html'">Audit</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= SECTION: REVENUE ================= -->
+            <div id="sec-revenue" class="admin-section">
+                <div class="panel-card p-5 mb-6">
+                    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                        <div>
+                            <h2 class="font-serif text-2xl text-white">Financial Ledger & Salon Revenue</h2>
+                            <p class="text-xs text-gray-400">Gross salon receipts, payment splits, tax breakdown & staff commissions</p>
+                        </div>
+                        <button class="btn-primary" onclick="window.location.href='404.html'"><i class="fa-solid fa-download"></i> Export Ledger (CSV)</button>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+                        <div class="p-4 rounded-xl bg-white/5 border border-white/5">
+                            <span class="text-xs text-brand-accent uppercase font-bold">This Month Gross</span>
+                            <div class="text-2xl font-serif text-white mt-1">₹8,42,000</div>
+                        </div>
+                        <div class="p-4 rounded-xl bg-white/5 border border-white/5">
+                            <span class="text-xs text-brand-accent uppercase font-bold">Service Revenue</span>
+                            <div class="text-2xl font-serif text-white mt-1">₹7,65,000</div>
+                        </div>
+                        <div class="p-4 rounded-xl bg-white/5 border border-white/5">
+                            <span class="text-xs text-brand-accent uppercase font-bold">Retail Sales</span>
+                            <div class="text-2xl font-serif text-white mt-1">₹77,000</div>
+                        </div>
+                        <div class="p-4 rounded-xl bg-white/5 border border-white/5">
+                            <span class="text-xs text-brand-accent uppercase font-bold">GST Collected (18%)</span>
+                            <div class="text-2xl font-serif text-white mt-1">₹1,51,560</div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Receipt ID</th>
+                                    <th>Date</th>
+                                    <th>Guest</th>
+                                    <th>Service & Products</th>
+                                    <th>Payment Method</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="font-mono text-xs">RCP-2026-901</td>
+                                    <td>Today &bull; 12:45 PM</td>
+                                    <td class="font-semibold text-white">Kavita Nair</td>
+                                    <td>Bond Repair Ritual + Oribe Oil</td>
+                                    <td><span class="badge badge-green">UPI / QR</span></td>
+                                    <td class="font-bold text-white">₹6,300</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-mono text-xs">RCP-2026-902</td>
+                                    <td>Today &bull; 11:15 AM</td>
+                                    <td class="font-semibold text-white">Rhea Kapoor</td>
+                                    <td>The Essential Blowout</td>
+                                    <td><span class="badge badge-blue">Credit Card</span></td>
+                                    <td class="font-bold text-white">₹1,200</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-mono text-xs">RCP-2026-899</td>
+                                    <td>Yesterday &bull; 06:30 PM</td>
+                                    <td class="font-semibold text-white">Shalini Verma</td>
+                                    <td>Bespoke Balayage + Scalp Detox</td>
+                                    <td><span class="badge badge-green">UPI / PhonePe</span></td>
+                                    <td class="font-bold text-white">₹8,300</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= SECTION: SETTINGS ================= -->
+            <div id="sec-settings" class="admin-section">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Salon Operations Form -->
+                    <div class="panel-card p-6">
+                        <h2 class="font-serif text-xl text-white mb-1">Studio Operations & Business Profile</h2>
+                        <p class="text-xs text-gray-400 mb-6">Manage studio identity, address, contact and business hours</p>
+
+                        <div id="store-settings-succ" class="alert-success mb-5 hidden">
+                            <i class="fa-solid fa-circle-check"></i> Salon operational parameters saved successfully!
+                        </div>
+
+                        <form onsubmit="handleStoreSettings(event)" class="space-y-4">
+                            <div>
+                                <label class="form-label">Studio Name</label>
+                                <input type="text" id="set-store-name" class="form-input" value="Stackly Aesthetics & Hair Studio">
+                                <span class="error-msg" id="set-store-err">Please enter studio name.</span>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="form-label">Business GSTIN</label>
+                                    <input type="text" id="set-gstin" class="form-input" value="33AAAAA0000A1Z5">
+                                    <span class="error-msg" id="set-gstin-err">GSTIN must be 15 alphanumeric characters.</span>
+                                </div>
+                                <div>
+                                    <label class="form-label">Official Contact Email</label>
+                                    <input type="email" id="set-email" class="form-input" value="hello@stackly.in">
+                                    <span class="error-msg" id="set-email-err">Please enter a valid email.</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="form-label">Studio Address</label>
+                                <input type="text" id="set-address" class="form-input" value="124 Styling Ave, Salem, Tamil Nadu 636001">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="form-label">Weekday Hours</label>
+                                    <input type="text" class="form-input" value="9:00 AM – 8:00 PM">
+                                </div>
+                                <div>
+                                    <label class="form-label">Weekend Hours</label>
+                                    <input type="text" class="form-input" value="10:00 AM – 7:00 PM">
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn-primary mt-2">Save Studio Profile</button>
+                        </form>
+                    </div>
+
+                    <!-- Admin Security Credentials -->
+                    <div class="panel-card p-6">
+                        <h2 class="font-serif text-xl text-white mb-1">Director Security & Password</h2>
+                        <p class="text-xs text-gray-400 mb-6">Update creative director password and portal access keys</p>
+
+                        <div id="adm-pw-succ" class="alert-success mb-5 hidden">
+                            <i class="fa-solid fa-circle-check"></i> Security credentials updated successfully!
+                        </div>
+
+                        <form onsubmit="handleAdminPw(event)" class="space-y-4">
+                            <div>
+                                <label class="form-label">Current Password</label>
+                                <input type="password" id="adm-curr-pw" class="form-input" placeholder="••••••••">
+                                <span class="error-msg" id="adm-curr-pw-err">Current password is required.</span>
+                            </div>
+
+                            <div>
+                                <label class="form-label">New Password</label>
+                                <input type="password" id="adm-new-pw" class="form-input" placeholder="Minimum 8 characters">
+                                <span class="error-msg" id="adm-new-pw-err">Password must be at least 8 characters.</span>
+                            </div>
+
+                            <div>
+                                <label class="form-label">Confirm New Password</label>
+                                <input type="password" id="adm-conf-pw" class="form-input" placeholder="Repeat new password">
+                                <span class="error-msg" id="adm-conf-pw-err">Passwords do not match.</span>
+                            </div>
+
+                            <button type="submit" class="btn-primary mt-2">Update Security Credentials</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OTHER SECTIONS (Analytics, Categories, Customers, Reviews, Invoices, Support) handled cleanly via switchSection -->
+            <div id="sec-analytics" class="admin-section">
+                <div class="panel-card p-6">
+                    <h2 class="font-serif text-2xl text-white mb-2">Salon Performance Analytics</h2>
+                    <p class="text-xs text-gray-400 mb-6">Detailed rebooking metrics, client retention, and stylist efficiency</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
+                        <div class="p-4 rounded-xl bg-white/5 border border-white/5">
+                            <span class="text-xs text-gray-400 font-bold uppercase">Guest Retention Rate</span>
+                            <div class="text-3xl font-serif text-emerald-400 mt-2">84.6%</div>
+                            <p class="text-xs text-gray-400 mt-1">High recurring booking frequency</p>
+                        </div>
+                        <div class="p-4 rounded-xl bg-white/5 border border-white/5">
+                            <span class="text-xs text-gray-400 font-bold uppercase">Average Ticket Value</span>
+                            <div class="text-3xl font-serif text-white mt-2">₹3,850</div>
+                            <p class="text-xs text-gray-400 mt-1">Combined treatment & backbar retail</p>
+                        </div>
+                        <div class="p-4 rounded-xl bg-white/5 border border-white/5">
+                            <span class="text-xs text-gray-400 font-bold uppercase">Consultation Conversion</span>
+                            <div class="text-3xl font-serif text-brand-accent mt-2">91.2%</div>
+                            <p class="text-xs text-gray-400 mt-1">Diagnostic to booking closure</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="sec-categories" class="admin-section">
+                <div class="panel-card p-6">
+                    <h2 class="font-serif text-2xl text-white mb-2">Service Categories</h2>
+                    <p class="text-xs text-gray-400 mb-6">Menu hierarchy and treatment classifications</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="p-4 rounded-xl bg-white/5 border border-white/5 flex justify-between items-center">
+                            <div>
+                                <h4 class="font-serif text-lg text-white">Structural Cutting & Styling</h4>
+                                <p class="text-xs text-gray-400">4 Treatments &bull; Average fee: ₹2,800</p>
+                            </div>
+                            <span class="badge badge-olive">Primary</span>
+                        </div>
+                        <div class="p-4 rounded-xl bg-white/5 border border-white/5 flex justify-between items-center">
+                            <div>
+                                <h4 class="font-serif text-lg text-white">Color Architecture</h4>
+                                <p class="text-xs text-gray-400">5 Treatments &bull; Average fee: ₹5,500</p>
+                            </div>
+                            <span class="badge badge-olive">High Value</span>
+                        </div>
+                        <div class="p-4 rounded-xl bg-white/5 border border-white/5 flex justify-between items-center">
+                            <div>
+                                <h4 class="font-serif text-lg text-white">Cellular Scalp & Bond Therapy</h4>
+                                <p class="text-xs text-gray-400">4 Treatments &bull; Average fee: ₹1,950</p>
+                            </div>
+                            <span class="badge badge-olive">Wellness</span>
+                        </div>
+                        <div class="p-4 rounded-xl bg-white/5 border border-white/5 flex justify-between items-center">
+                            <div>
+                                <h4 class="font-serif text-lg text-white">Signature Experiences</h4>
+                                <p class="text-xs text-gray-400">3 Packages &bull; Average fee: ₹8,500</p>
+                            </div>
+                            <span class="badge badge-green">VIP</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="sec-customers" class="admin-section">
+                <div class="panel-card p-6">
+                    <h2 class="font-serif text-2xl text-white mb-2">Salon Guests CRM</h2>
+                    <p class="text-xs text-gray-400 mb-6">Guest history, preferred stylists & color formula profiles</p>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Guest Name</th>
+                                    <th>Contact</th>
+                                    <th>Visits</th>
+                                    <th>Formula Profile</th>
+                                    <th>Preferred Artisan</th>
+                                    <th>VIP Tier</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="font-bold text-white">Aditi Sharma</td>
+                                    <td>aditi.sharma@gmail.com</td>
+                                    <td>14</td>
+                                    <td>Level 8.1 Ash Beige Balayage</td>
+                                    <td>Elena Moreau</td>
+                                    <td><span class="badge badge-green">Gold VIP</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold text-white">Priya Sundaram</td>
+                                    <td>priya.s@outlook.com</td>
+                                    <td>8</td>
+                                    <td>Natural Texture Cut, Wavy 2B</td>
+                                    <td>Julian Reyes</td>
+                                    <td><span class="badge badge-olive">Member</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold text-white">Meera Krishnan</td>
+                                    <td>meera.k@gmail.com</td>
+                                    <td>6</td>
+                                    <td>Sensitive Scalp, Organic Detox</td>
+                                    <td>Marcus Chen</td>
+                                    <td><span class="badge badge-olive">Member</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="sec-reviews" class="admin-section">
+                <div class="panel-card p-6">
+                    <h2 class="font-serif text-2xl text-white mb-2">Guest Reviews & Feedback</h2>
+                    <p class="text-xs text-gray-400 mb-6">Client satisfaction ratings and verified salon commentary</p>
+                    <div class="space-y-4">
+                        <div class="p-4 rounded-xl bg-white/5 border border-white/5">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-white">Aditi Sharma &bull; Elena Moreau (Balayage)</span>
+                                <span class="text-amber-400 text-xs">★★★★★ 5.0</span>
+                            </div>
+                            <p class="text-xs text-gray-300 leading-relaxed">"The color architecture was phenomenal. Elena took the time to study my skin undertones and the grow-out is seamlessly natural."</p>
+                        </div>
+                        <div class="p-4 rounded-xl bg-white/5 border border-white/5">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-white">Priya Sundaram &bull; Julian Reyes (Signature Cut)</span>
+                                <span class="text-amber-400 text-xs">★★★★★ 5.0</span>
+                            </div>
+                            <p class="text-xs text-gray-300 leading-relaxed">"Julian's structural cutting has transformed how my hair air-dries. It holds its silhouette without needing heavy heat styling."</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="sec-invoices" class="admin-section">
+                <div class="panel-card p-6">
+                    <h2 class="font-serif text-2xl text-white mb-2">Guest Invoices & Billing</h2>
+                    <p class="text-xs text-gray-400 mb-6">Official tax invoices and treatment receipts</p>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Invoice #</th>
+                                    <th>Date</th>
+                                    <th>Guest</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="font-mono text-xs">STK-INV-2026-081</td>
+                                    <td>Today</td>
+                                    <td class="font-bold text-white">Aditi Sharma</td>
+                                    <td class="font-bold text-white">₹7,670 (inc. GST)</td>
+                                    <td><span class="badge badge-green">Paid</span></td>
+                                    <td><button class="btn-ghost py-1 px-2.5 text-xs" onclick="window.location.href='404.html'">Download PDF</button></td>
+                                </tr>
+                                <tr>
+                                    <td class="font-mono text-xs">STK-INV-2026-080</td>
+                                    <td>Today</td>
+                                    <td class="font-bold text-white">Priya Sundaram</td>
+                                    <td class="font-bold text-white">₹2,950 (inc. GST)</td>
+                                    <td><span class="badge badge-green">Paid</span></td>
+                                    <td><button class="btn-ghost py-1 px-2.5 text-xs" onclick="window.location.href='404.html'">Download PDF</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="sec-support" class="admin-section">
+                <div class="panel-card p-6">
+                    <h2 class="font-serif text-2xl text-white mb-2">Guest Inquiries & Consultations</h2>
+                    <p class="text-xs text-gray-400 mb-6">Pre-appointment consultation requests and client questions</p>
+                    <div class="space-y-4">
+                        <div class="p-4 rounded-xl bg-white/5 border border-white/5 flex justify-between items-start">
+                            <div>
+                                <span class="badge badge-yellow mb-2">New Inquiry</span>
+                                <h4 class="font-bold text-white text-sm">Color Correction Consultation Request</h4>
+                                <p class="text-xs text-gray-400 mt-1">From: Maya Kapoor &bull; Seeking balayage fix for previous box dye.</p>
+                            </div>
+                            <button class="btn-primary text-xs" onclick="window.location.href='404.html'">Respond</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MODAL: ADD PRODUCT / SERVICE -->
+    <div id="add-prod-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+        <div class="bg-[#141720] border border-white/15 rounded-2xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative text-left">
+            <button onclick="closeAddProductModal()" class="absolute top-5 right-5 text-gray-400 hover:text-white text-xl cursor-pointer bg-transparent border-none">&times;</button>
+            <h3 class="font-serif text-2xl text-white mb-1">Add Treatment / Product</h3>
+            <p class="text-xs text-gray-400 mb-6">Configure a new salon service or boutique retail inventory item</p>
+
+            <div id="prod-success" class="alert-success mb-4 hidden">
+                <i class="fa-solid fa-circle-check"></i> Item successfully registered to Atelier menu!
+            </div>
+
+            <form onsubmit="handleAddProduct(e)" id="add-prod-form" class="space-y-4">
+                <div>
+                    <label class="form-label">Service / Product Name</label>
+                    <input type="text" id="prod-name" class="form-input" placeholder="e.g. Japanese Silk Smoothing Treatment">
+                    <span class="error-msg" id="prod-name-err">Name must be at least 3 characters.</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="form-label">Classification</label>
+                        <select id="prod-cat" class="form-input">
+                            <option value="">Select Category</option>
+                            <option value="Structural Cutting">Structural Cutting</option>
+                            <option value="Color Architecture">Color Architecture</option>
+                            <option value="Cellular Therapy">Cellular Therapy</option>
+                            <option value="Signature Experience">Signature Experience</option>
+                            <option value="Boutique Retail">Boutique Retail</option>
+                        </select>
+                        <span class="error-msg" id="prod-cat-err">Please select a category.</span>
+                    </div>
+                    <div>
+                        <label class="form-label">Fee / Price (₹)</label>
+                        <input type="number" id="prod-price" class="form-input" placeholder="3500">
+                        <span class="error-msg" id="prod-price-err">Price must be greater than 0.</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="form-label">Standard Duration / Stock</label>
+                    <input type="text" id="prod-stock" class="form-input" placeholder="e.g. 75 mins or 20 units">
+                    <span class="error-msg" id="prod-stock-err">Please specify duration or stock.</span>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-4 border-t border-white/10">
+                    <button type="button" onclick="closeAddProductModal()" class="btn-ghost">Cancel</button>
+                    <button type="submit" class="btn-primary">Add to Studio Menu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ADD APPOINTMENT -->
+    <div id="add-booking-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+        <div class="bg-[#141720] border border-white/15 rounded-2xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative text-left">
+            <button onclick="closeAddBookingModal()" class="absolute top-5 right-5 text-gray-400 hover:text-white text-xl cursor-pointer bg-transparent border-none">&times;</button>
+            <h3 class="font-serif text-2xl text-white mb-1">Book New Appointment</h3>
+            <p class="text-xs text-gray-400 mb-6">Schedule a chair reservation for guest treatment</p>
+
+            <form onsubmit="handleNewBooking(event)" class="space-y-4">
+                <div>
+                    <label class="form-label">Guest Full Name</label>
+                    <input type="text" id="bk-guest-name" required class="form-input" placeholder="Full Name">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="form-label">Treatment Service</label>
+                        <select id="bk-service" required class="form-input">
+                            <option value="The Signature Cut">The Signature Cut (₹2,500)</option>
+                            <option value="Bespoke Balayage">Bespoke Balayage (₹6,500)</option>
+                            <option value="Scalp Detoxification">Scalp Detoxification (₹1,800)</option>
+                            <option value="The Complete Canvas">The Complete Canvas (₹9,500)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Assigned Artisan</label>
+                        <select id="bk-artisan" required class="form-input">
+                            <option value="Elena Moreau">Elena Moreau (Balayage)</option>
+                            <option value="Julian Reyes">Julian Reyes (Cut Lead)</option>
+                            <option value="Marcus Chen">Marcus Chen (Scalp Therapy)</option>
+                            <option value="Priya Sharma">Priya Sharma (Texture Lead)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="form-label">Station / Chair</label>
+                        <select id="bk-station" class="form-input">
+                            <option value="Station 1">Station 1</option>
+                            <option value="Station 2">Station 2</option>
+                            <option value="Station 3">Station 3</option>
+                            <option value="Station 4">Station 4</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Time Slot</label>
+                        <input type="text" id="bk-time" required class="form-input" value="03:00 PM">
+                    </div>
+                </div>
+                <div class="flex justify-end gap-3 pt-4 border-t border-white/10">
+                    <button type="button" onclick="closeAddBookingModal()" class="btn-ghost">Cancel</button>
+                    <button type="submit" class="btn-primary">Confirm Chair Booking</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script Logic -->
+    <script src="validation.js"></script>
+    <script>
+        let revenueChart = null;
+        let categoryDoughnutChart = null;
+        let currentTimeframe = 'monthly';
+        let currentMetric = 'revenue';
+
+        function switchSection(sectionId) {
+            document.querySelectorAll('.admin-section').forEach(sec => sec.classList.remove('active'));
+            const target = document.getElementById('sec-' + sectionId);
+            if (target) target.classList.add('active');
+
+            document.querySelectorAll('.sidebar .nav-item').forEach(item => item.classList.remove('active'));
+            const navTarget = document.getElementById('nav-' + sectionId);
+            if (navTarget) navTarget.classList.add('active');
+
+            const titles = {
+                'overview': 'Studio Dashboard Overview',
+                'analytics': 'Salon Performance Analytics',
+                'orders': 'Appointments & Bookings',
+                'products': 'Treatment Menu & Retail Care',
+                'inventory': 'Backbar & Inventory Dispensary',
+                'categories': 'Service Categories',
+                'customers': 'Salon Guests CRM',
+                'reviews': 'Guest Reviews & Feedback',
+                'revenue': 'Financial Ledger & Revenue',
+                'invoices': 'Guest Invoices',
+                'settings': 'Studio Settings',
+                'support': 'Inquiries & Consultations'
+            };
+            document.getElementById('topbar-title').textContent = titles[sectionId] || 'Admin Portal';
+
+            if (window.innerWidth < 1024) closeSidebar();
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('mobile-overlay').classList.toggle('show');
+        }
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('mobile-overlay').classList.remove('show');
+        }
+
+        function toggleProfileDropdown(e) {
+            e.stopPropagation();
+            document.getElementById('profile-dropdown-menu').classList.toggle('hidden');
+        }
+        function hideProfileDropdown() {
+            document.getElementById('profile-dropdown-menu').classList.add('hidden');
+        }
+        document.addEventListener('click', hideProfileDropdown);
+
+        // Chart Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            initCharts();
+        });
+
+        function initCharts() {
+            // 1. Revenue Velocity Line Chart
+            const revCtx = document.getElementById('revenueChart').getContext('2d');
+            revenueChart = new Chart(revCtx, {
+                type: 'line',
+                data: getChartConfig('monthly', 'revenue'),
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#141720',
+                            titleColor: '#f4f3ed',
+                            bodyColor: '#a3a99e',
+                            borderColor: 'rgba(79, 89, 69, 0.4)',
+                            borderWidth: 1,
+                            padding: 12
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255,255,255,0.03)' },
+                            ticks: { color: '#8892a4', font: { family: 'Inter', size: 11 } }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: {
+                                color: '#8892a4',
+                                font: { family: 'Inter', size: 11 },
+                                callback: (v) => '₹' + v + 'k'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 2. Category Doughnut Chart
+            const catCtx = document.getElementById('categoryDoughnutChart').getContext('2d');
+            categoryDoughnutChart = new Chart(catCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Balayage & Color', 'Precision Cuts', 'Scalp Therapy', 'Retail Care'],
+                    datasets: [{
+                        data: [45, 28, 18, 9],
+                        backgroundColor: ['#4f5945', '#a3a99e', '#10b981', '#f59e0b'],
+                        borderColor: '#14171d',
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#141720',
+                            bodyColor: '#f4f3ed',
+                            borderColor: 'rgba(79,89,69,0.3)',
+                            borderWidth: 1
+                        }
+                    },
+                    cutout: '72%'
+                }
+            });
+        }
+
+        function getChartConfig(timeframe, metric) {
+            const labels = timeframe === 'monthly' ? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'] : ['2023', '2024', '2025', '2026'];
+            const dataRev = timeframe === 'monthly' ? [420, 480, 560, 520, 640, 710, 690, 780, 810, 842] : [4800, 6200, 7800, 9400];
+            const dataBk = timeframe === 'monthly' ? [140, 160, 190, 175, 215, 240, 230, 260, 275, 290] : [1600, 2100, 2700, 3200];
+
+            return {
+                labels: labels,
+                datasets: [{
+                    label: metric === 'revenue' ? 'Revenue (₹)' : 'Appointments',
+                    data: metric === 'revenue' ? dataRev : dataBk,
+                    borderColor: '#4f5945',
+                    backgroundColor: 'rgba(79, 89, 69, 0.15)',
+                    borderWidth: 2.5,
+                    fill: true,
+                    tension: 0.35,
+                    pointBackgroundColor: '#a3a99e',
+                    pointBorderColor: '#14171d',
+                    pointBorderWidth: 2,
+                    pointRadius: 4.5
+                }]
+            };
+        }
+
+        function switchChartTimeframe(tf, btn) {
+            currentTimeframe = tf;
+            document.querySelectorAll('#tab-monthly, #tab-yearly').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            revenueChart.data = getChartConfig(currentTimeframe, currentMetric);
+            revenueChart.update();
+        }
+
+        function toggleMetric(m, btn) {
+            currentMetric = m;
+            document.querySelectorAll('#tab-rev-mode, #tab-ord-mode').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            revenueChart.data = getChartConfig(currentTimeframe, currentMetric);
+            revenueChart.options.scales.y.ticks.callback = (v) => currentMetric === 'revenue' ? '₹' + v + 'k' : v;
+            revenueChart.update();
+        }
+
+        // Modals
+        function openAddProductModal() {
+            document.getElementById('add-prod-modal').classList.remove('hidden');
+        }
+        function closeAddProductModal() {
+            document.getElementById('add-prod-modal').classList.add('hidden');
+        }
+        function openAddBookingModal() {
+            document.getElementById('add-booking-modal').classList.remove('hidden');
+        }
+        function closeAddBookingModal() {
+            document.getElementById('add-booking-modal').classList.add('hidden');
+        }
+
+        function handleAddProduct(e) {
+            e.preventDefault();
+            const name = document.getElementById('prod-name').value.trim();
+            const cat = document.getElementById('prod-cat').value;
+            const price = parseFloat(document.getElementById('prod-price').value);
+            const stock = document.getElementById('prod-stock').value.trim();
+
+            let valid = true;
+            if (!name || name.length < 3) { document.getElementById('prod-name-err').classList.add('show'); valid = false; }
+            else { document.getElementById('prod-name-err').classList.remove('show'); }
+
+            if (!cat) { document.getElementById('prod-cat-err').classList.add('show'); valid = false; }
+            else { document.getElementById('prod-cat-err').classList.remove('show'); }
+
+            if (!price || price <= 0) { document.getElementById('prod-price-err').classList.add('show'); valid = false; }
+            else { document.getElementById('prod-price-err').classList.remove('show'); }
+
+            if (!stock) { document.getElementById('prod-stock-err').classList.add('show'); valid = false; }
+            else { document.getElementById('prod-stock-err').classList.remove('show'); }
+
+            if (!valid) return;
+
+            const tbody = document.querySelector('#products-table tbody');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="font-mono text-xs text-brand-muted">STK-NEW-${Math.floor(Math.random()*90+10)}</td>
+                <td class="font-bold text-white">${name}</td>
+                <td><span class="badge badge-olive">${cat}</span></td>
+                <td class="font-bold text-white">₹${price.toLocaleString('en-IN')}</td>
+                <td>${stock}</td>
+                <td><span class="badge badge-green">Active</span></td>
+                <td>
+                    <button class="btn-ghost text-xs py-1 px-2" onclick="editProductRow('${name}')"><i class="fa-solid fa-pen"></i></button>
+                    <button class="btn-ghost text-xs py-1 px-2 text-red-400" onclick="deleteProductRow(this)"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            `;
+            tbody.prepend(tr);
+
+            const succ = document.getElementById('prod-success');
+            succ.classList.remove('hidden');
+            setTimeout(() => {
+                succ.classList.add('hidden');
+                closeAddProductModal();
+                document.getElementById('add-prod-form').reset();
+            }, 1200);
+        }
+
+        function handleNewBooking(e) {
+            e.preventDefault();
+            const guest = document.getElementById('bk-guest-name').value.trim();
+            const service = document.getElementById('bk-service').value;
+            const artisan = document.getElementById('bk-artisan').value;
+            const station = document.getElementById('bk-station').value;
+            const time = document.getElementById('bk-time').value.trim();
+
+            const tbody = document.querySelector('#bookings-table tbody');
+            const tr = document.createElement('tr');
+            tr.dataset.status = 'Confirmed';
+            tr.innerHTML = `
+                <td class="font-mono text-xs text-brand-muted">STK-BK-${Math.floor(Math.random()*9000+1000)}</td>
+                <td class="font-bold text-white">${guest}</td>
+                <td>${service}</td>
+                <td class="text-brand-accent">${artisan}</td>
+                <td>Today &bull; ${time}</td>
+                <td>${station}</td>
+                <td><span class="badge badge-green">Confirmed</span></td>
+                <td class="font-bold text-white">₹3,500</td>
+                <td><button class="btn-ghost py-1 px-2.5 text-xs" onclick="showBookingAction('${guest}')">Actions</button></td>
+            `;
+            tbody.prepend(tr);
+            closeAddBookingModal();
+            alert('Appointment confirmed for ' + guest + ' with ' + artisan + ' at ' + station + '!');
+        }
+
+        function filterBookings(status, btn) {
+            document.querySelectorAll('#sec-orders .tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const rows = document.querySelectorAll('#bookings-table tbody tr');
+            rows.forEach(r => {
+                if (status === 'all' || r.dataset.status === status) {
+                    r.style.display = '';
+                } else {
+                    r.style.display = 'none';
+                }
+            });
+        }
+
+        function handleStoreSettings(e) {
+            e.preventDefault();
+            const name = document.getElementById('set-store-name').value.trim();
+            const email = document.getElementById('set-email').value.trim();
+            let valid = true;
+
+            if (!name) { document.getElementById('set-store-err').classList.add('show'); valid = false; }
+            else { document.getElementById('set-store-err').classList.remove('show'); }
+
+            if (!email || !email.includes('@')) { document.getElementById('set-email-err').classList.add('show'); valid = false; }
+            else { document.getElementById('set-email-err').classList.remove('show'); }
+
+            if (!valid) return;
+            const succ = document.getElementById('store-settings-succ');
+            succ.classList.remove('hidden');
+            setTimeout(() => succ.classList.add('hidden'), 3500);
+        }
+
+        function handleAdminPw(e) {
+            e.preventDefault();
+            const curr = document.getElementById('adm-curr-pw').value;
+            const newPw = document.getElementById('adm-new-pw').value;
+            const conf = document.getElementById('adm-conf-pw').value;
+            let valid = true;
+
+            if (!curr) { document.getElementById('adm-curr-pw-err').classList.add('show'); valid = false; }
+            else { document.getElementById('adm-curr-pw-err').classList.remove('show'); }
+
+            if (!newPw || newPw.length < 8) { document.getElementById('adm-new-pw-err').classList.add('show'); valid = false; }
+            else { document.getElementById('adm-new-pw-err').classList.remove('show'); }
+
+            if (!conf || conf !== newPw) { document.getElementById('adm-conf-pw-err').classList.add('show'); valid = false; }
+            else { document.getElementById('adm-conf-pw-err').classList.remove('show'); }
+
+            if (!valid) return;
+            const succ = document.getElementById('adm-pw-succ');
+            succ.classList.remove('hidden');
+            e.target.reset();
+            setTimeout(() => succ.classList.add('hidden'), 3500);
+        }
+
+        function viewBookingDetails(guest, service) {
+            window.location.href = '404.html';
+        }
+
+        function showBookingAction(guest) {
+            window.location.href = '404.html';
+        }
+
+        function editProductRow(name) {
+            window.location.href = '404.html';
+        }
+
+        function deleteProductRow(btn) {
+            if (confirm('Are you sure you wish to archive this treatment from the live menu?')) {
+                btn.closest('tr').remove();
+            }
+        }
+
+        function showNotif() {
+            window.location.href = '404.html';
+        }
+
+        function confirmAdminLogout(e) {
+            if (e) e.preventDefault();
+            if (confirm('Sign out of the Stackly Studio Central Management Portal?')) {
+                window.location.href = 'login.html';
+            }
+        }
+
+        function handleGlobalSearch() {
+            const query = document.getElementById('global-admin-search').value.toLowerCase();
+            const rows = document.querySelectorAll('.data-table tbody tr');
+            rows.forEach(r => {
+                const text = r.textContent.toLowerCase();
+                r.style.display = text.includes(query) ? '' : 'none';
+            });
+        }
+    </script>
+</body>
+</html>

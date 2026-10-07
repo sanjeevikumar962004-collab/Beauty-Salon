@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Portal | Stackly Aesthetics & Hair Studio</title>
+    <meta name="description" content="Manage your Stackly Aesthetics appointments, personal hair diagnostic profile, color formula vault, loyalty rewards, and concierge settings.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        * { box-sizing: border-box; }
+        :root {
+            --bg: #0f1013;
+            --panel: #15181e;
+            --panel-hover: #1c2028;
+            --border: rgba(244, 243, 237, 0.08);
+            --border-hover: rgba(79, 89, 69, 0.5);
+            --text: #f4f3ed;
+            --muted: #9ca3af;
+            --olive: #4f5945;
+            --sage: #a3a99e;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: #2a2f3b; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--olive); }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            min-height: 100vh;
+            background: var(--panel);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; left: 0;
+            z-index: 40;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .sidebar-logo {
+            padding: 1.4rem 1.4rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .nav-item {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.65rem 1.1rem; color: var(--muted);
+            font-size: 0.8rem; font-weight: 500;
+            border-radius: 10px; margin: 2px 0.6rem;
+            transition: all 0.2s ease; cursor: pointer; text-decoration: none;
+        }
+        .nav-item:hover { background: rgba(79, 89, 69, 0.15); color: #fff; }
+        .nav-item.active { background: var(--olive); color: #fff; font-weight: 600; box-shadow: 0 4px 15px rgba(79, 89, 69, 0.35); }
+        .nav-item.active i { color: #fff; }
+        .nav-item i { width: 16px; text-align: center; font-size: 0.9rem; }
+        .nav-section-label {
+            font-size: 0.58rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 0.18em; color: #525a6b; padding: 0.75rem 1.25rem 0.35rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+            transition: margin-left 0.3s ease;
+        }
+
+        /* Topbar */
+        .topbar {
+            height: 66px; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; padding: 0 1.5rem; gap: 1rem;
+            background: rgba(15, 16, 19, 0.92);
+            backdrop-filter: blur(16px);
+            position: sticky; top: 0; z-index: 30;
+        }
+
+        /* Cards */
+        .stat-card {
+            background: var(--panel); border: 1px solid var(--border);
+            border-radius: 18px; padding: 1.25rem 1.4rem;
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover { border-color: var(--border-hover); background: var(--panel-hover); transform: translateY(-2px); }
+        
+        .panel-card {
+            background: var(--panel); border: 1px solid var(--border);
+            border-radius: 18px; transition: all 0.3s ease;
+        }
+        .panel-card:hover { border-color: var(--border-hover); }
+
+        /* Badge */
+        .badge {
+            display: inline-flex; align-items: center;
+            padding: 0.25rem 0.65rem; border-radius: 9999px;
+            font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .badge-green { background: rgba(16,185,129,0.12); color: #10b981; border: 1px solid rgba(16,185,129,0.25); }
+        .badge-yellow { background: rgba(245,158,11,0.12); color: #f59e0b; border: 1px solid rgba(245,158,11,0.25); }
+        .badge-blue { background: rgba(59,130,246,0.12); color: #60a5fa; border: 1px solid rgba(59,130,246,0.25); }
+        .badge-olive { background: rgba(79,89,69,0.3); color: #f4f3ed; border: 1px solid rgba(163,169,158,0.3); }
+
+        /* Table & Responsiveness */
+        .table-responsive {
+            width: 100% !important;
+            max-width: 100% !important;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        .data-table {
+            width: 100% !important;
+            min-width: 640px !important;
+            border-collapse: collapse;
+        }
+        .data-table th, .data-table td {
+            white-space: nowrap;
+        }
+        .data-table th {
+            text-align: left; padding: 0.75rem 1rem;
+            font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.12em; color: var(--sage); border-bottom: 1px solid var(--border);
+        }
+        .data-table td {
+            padding: 0.95rem 1rem; font-size: 0.82rem;
+            border-bottom: 1px solid var(--border); color: #d1d5db;
+        }
+        .data-table tr:last-child td { border-bottom: none; }
+        .data-table tbody tr { transition: background 0.2s ease; }
+        .data-table tbody tr:hover { background: rgba(79, 89, 69, 0.08); }
+
+        /* Buttons */
+        .btn-primary {
+            background: var(--olive); color: #f4f3ed;
+            padding: 0.55rem 1.25rem; border-radius: 9999px;
+            font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+            border: none; cursor: pointer; transition: all 0.3s ease;
+            display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+        }
+        .btn-primary:hover { background: #3e4636; transform: translateY(-1px); box-shadow: 0 4px 15px rgba(79, 89, 69, 0.35); }
+        
+        .btn-ghost {
+            background: transparent; color: var(--muted);
+            padding: 0.5rem 0.9rem; border-radius: 9999px;
+            font-size: 0.75rem; font-weight: 600;
+            border: 1px solid var(--border); cursor: pointer;
+            transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+        }
+        .btn-ghost:hover { color: #fff; border-color: rgba(79,89,69,0.5); background: rgba(79,89,69,0.1); }
+
+        .avatar { width: 36px; height: 36px; border-radius: 50%; background: #252b36; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: #fff; flex-shrink: 0; border: 1px solid rgba(163,169,158,0.3); }
+
+        .form-input {
+            width: 100%; background: #11141b; border: 1px solid var(--border);
+            color: #fff; border-radius: 10px; padding: 0.75rem 1rem;
+            font-size: 0.85rem; outline: none; transition: all 0.3s ease;
+        }
+        .form-input::placeholder { color: #525a6b; }
+        .form-input:focus { border-color: var(--olive); background: #161a23; box-shadow: 0 0 0 3px rgba(79, 89, 69, 0.2); }
+        .form-input.input-error { border-color: #ef4444 !important; background: rgba(239,68,68,0.03); }
+        .form-input.input-success { border-color: var(--olive) !important; }
+        .form-label { display: block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--sage); margin-bottom: 0.5rem; }
+        .error-msg { font-size: 0.7rem; color: #ef4444; margin-top: 0.3rem; display: none; }
+        .error-msg.show { display: block; }
+
+        /* Mobile */
+        .mobile-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 35; }
+        @media (max-width: 1023px) {
+            .sidebar { transform: translateX(-250px); }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; }
+            .mobile-overlay.show { display: block; }
+        }
+
+        /* Tabs */
+        .tab-btn { padding: 0.5rem 1rem; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); border-bottom: 2px solid transparent; transition: all 0.2s ease; cursor: pointer; background: none; border-left: none; border-right: none; border-top: none; }
+        .tab-btn.active { color: #f4f3ed; border-bottom-color: var(--olive); }
+        .tab-btn:hover { color: #e5e5e5; }
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-up { animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        .delay-1 { animation-delay: 0.05s; } .delay-2 { animation-delay: 0.1s; } .delay-3 { animation-delay: 0.15s; }
+
+        .treatment-menu-card {
+            background: #14171d; border: 1px solid var(--border);
+            border-radius: 16px; overflow: hidden; transition: all 0.3s ease;
+        }
+        .treatment-menu-card:hover { border-color: var(--olive); transform: translateY(-3px); }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-overlay" id="mobile-overlay" onclick="closeSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <a href="index.html" class="flex items-center gap-2 hover:opacity-80 transition-opacity" title="Return to Studio Website">
+                <img src="images/stackly logo.webp" alt="Stackly Logo" class="h-8 w-auto object-contain">
+            </a>
+            <button onclick="closeSidebar()" class="lg:hidden text-gray-500 hover:text-white transition-colors focus:outline-none text-sm bg-transparent border-none cursor-pointer">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto py-3">
+            <div class="nav-section-label">My Sanctuary</div>
+            <a href="javascript:void(0)" class="nav-item active" id="nav-overview" onclick="switchTab('overview')">
+                <i class="ph-fill ph-house"></i> Atelier Overview
+            </a>
+            <a href="javascript:void(0)" class="nav-item" id="nav-orders" onclick="switchTab('orders')">
+                <i class="ph-fill ph-calendar-check"></i> My Appointments
+                <span class="ml-auto text-[9px] bg-brand-green/30 text-brand-accent px-2 py-0.5 rounded-full font-bold">1 Upcoming</span>
+            </a>
+            <a href="javascript:void(0)" class="nav-item" id="nav-wishlist" onclick="switchTab('wishlist')">
+                <i class="ph-fill ph-dna"></i> Hair Profile & Formulas
+                <span class="ml-auto text-[9px] bg-white/10 text-gray-300 px-2 py-0.5 rounded-full font-bold">Level 8.1</span>
+            </a>
+
+            <div class="nav-section-label mt-2">Treatments & Style</div>
+            <a href="javascript:void(0)" class="nav-item" id="nav-catalog" onclick="switchTab('catalog')">
+                <i class="ph-fill ph-scissors"></i> Curated Treatment Menu
+            </a>
+            <a href="javascript:void(0)" class="nav-item" id="nav-blog" onclick="switchTab('blog')">
+                <i class="ph-fill ph-book-open"></i> Style Journal & Looks
+            </a>
+
+            <div class="nav-section-label mt-2">Concierge & Account</div>
+            <a href="javascript:void(0)" class="nav-item" id="nav-support" onclick="switchTab('support')">
+                <i class="ph-fill ph-chat-teardrop-dots"></i> Stylist Consultation
+                <span class="ml-auto text-[9px] bg-blue-500/15 text-blue-400 px-2 py-0.5 rounded-full font-bold">Desk</span>
+            </a>
+            <a href="javascript:void(0)" class="nav-item" id="nav-profile" onclick="switchTab('profile')">
+                <i class="ph-fill ph-user-gear"></i> Preferences & Profile
+            </a>
+        </nav>
+
+        <div class="border-t border-white/5 p-4 bg-[#0d0e12]">
+            <div class="flex items-center gap-3">
+                <div class="avatar bg-brand-green text-white font-serif text-xs" id="user-avatar-sidebar">EL</div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-xs font-semibold truncate text-white" id="sidebar-name">Elena Vance</div>
+                    <div class="text-[10px] text-gray-400 truncate" id="sidebar-email">client@stackly.in</div>
+                </div>
+                <button onclick="confirmSignOut(event)" title="Sign Out" class="text-gray-400 hover:text-red-400 transition-colors text-sm bg-transparent border-none p-0 cursor-pointer">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content" id="main-content">
+
+        <!-- Topbar -->
+        <header class="topbar flex items-center justify-between px-3 sm:px-6 py-2.5 w-full overflow-hidden">
+            <button onclick="toggleSidebar()" class="lg:hidden text-gray-400 hover:text-white transition-colors focus:outline-none mr-2 bg-transparent border-none cursor-pointer flex-shrink-0">
+                <i class="fa-solid fa-bars text-sm"></i>
+            </button>
+            <a href="index.html" class="lg:hidden flex items-center mr-3 hover:opacity-80 transition-opacity" title="Stackly Home">
+                <img src="images/stackly logo.webp" alt="Stackly Logo" class="h-6 w-auto object-contain">
+            </a>
+            <div class="text-xs sm:text-sm font-semibold truncate font-serif text-brand-light flex-1 min-w-0" id="topbar-title">Guest Atelier Portal</div>
+
+            <div class="hidden xl:flex items-center gap-6 ml-6 text-xs text-brand-muted">
+                <a href="index.html" class="hover:text-brand-light transition-colors">Studio Home</a>
+                <a href="services.html" class="hover:text-brand-light transition-colors">Treatments</a>
+                <a href="blog.html" class="hover:text-brand-light transition-colors">Journal</a>
+                <a href="about.html" class="hover:text-brand-light transition-colors">Artisans</a>
+            </div>
+
+            <div class="ml-auto flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                <button onclick="switchTab('catalog')" class="btn-primary text-xs hidden sm:inline-flex cursor-pointer">
+                    <i class="ph ph-calendar-plus text-sm"></i> Reserve Chair
+                </button>
+                <div class="avatar bg-brand-green text-white font-serif text-xs cursor-pointer" onclick="switchTab('profile')" id="user-avatar-top" title="Account Preferences">E</div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <div class="p-4 md:p-6 flex-1 max-w-[1500px] w-full mx-auto">
+
+            <!-- ================= TAB: OVERVIEW ================= -->
+            <div id="tab-overview" class="tab-panel active">
+                <!-- Welcome Banner -->
+                <div class="panel-card p-5 sm:p-8 mb-6 fade-up relative overflow-hidden bg-gradient-to-r from-[#171a22] to-[#121419]">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6 relative z-10">
+                        <div>
+                            <div class="flex flex-wrap items-center gap-2 mb-2">
+                                <span class="badge badge-green font-serif text-[10px]">VIP Atelier Gold Member</span>
+                                <span class="text-xs text-brand-accent">&bull; 1,450 Salon Loyalty Points</span>
+                            </div>
+                            <h1 class="text-2xl sm:text-4xl font-serif text-white mb-2">
+                                Welcome Back, <span id="welcome-name">Elena</span>
+                            </h1>
+                            <p class="text-xs sm:text-sm text-gray-300 font-light max-w-xl leading-relaxed">
+                                Your next curated ritual is reserved. Check your formulation diagnostic and review personalized home-care recommendations below.
+                            </p>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-2.5 w-full sm:w-auto">
+                            <button onclick="switchTab('catalog')" class="btn-primary w-full sm:w-auto text-xs">
+                                <i class="ph ph-sparkle text-sm"></i> Book Treatment
+                            </button>
+                            <button onclick="openRedeemPointsModal()" class="btn-ghost w-full sm:w-auto text-xs">
+                                <i class="ph ph-gift text-sm"></i> Redeem Points
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Next Upcoming Appointment Hero Card -->
+                <div class="panel-card p-6 mb-6 border-brand-green/40 bg-[#161a22] fade-up delay-1">
+                    <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/5 pb-4 mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-brand-green/20 border border-brand-green/40 flex items-center justify-center text-brand-accent text-lg">
+                                <i class="ph-fill ph-calendar-check"></i>
+                            </div>
+                            <div>
+                                <span class="text-[10px] uppercase tracking-widest text-brand-accent font-bold">Upcoming Studio Ritual</span>
+                                <h3 class="font-serif text-xl text-white">Bespoke Balayage & Illuminating Gloss</h3>
+                            </div>
+                        </div>
+                        <span class="badge badge-yellow">Confirmed Appointment</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs py-2">
+                        <div>
+                            <span class="text-gray-400 block mb-1">Master Artisan</span>
+                            <span class="font-bold text-white text-sm">Elena Moreau</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400 block mb-1">Date & Time</span>
+                            <span class="font-bold text-white text-sm">Friday, Oct 24 &bull; 03:00 PM</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400 block mb-1">Chair / Station</span>
+                            <span class="font-bold text-white text-sm">Station 1 (Color Atelier)</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400 block mb-1">Estimated Duration</span>
+                            <span class="font-bold text-white text-sm">3.0 Hours (Bond Protected)</span>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-white/5 mt-4">
+                        <span class="text-xs text-gray-400">Consultation Form: Attached with Level 8.1 Ash Beige notes.</span>
+                        <div class="flex gap-2">
+                            <button onclick="window.location.href='404.html'" class="btn-ghost text-xs py-1.5 px-3">
+                                <i class="fa-solid fa-calendar-plus text-xs"></i> Add to Calendar
+                            </button>
+                            <button onclick="switchTab('support')" class="btn-ghost text-xs py-1.5 px-3">
+                                <i class="fa-solid fa-message text-xs"></i> Message Artisan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Row -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+                    <div class="stat-card fade-up delay-1 cursor-pointer" onclick="switchTab('orders')">
+                        <div class="text-[10px] uppercase tracking-widest text-brand-accent mb-2 font-semibold">Total Visits</div>
+                        <div class="text-2xl sm:text-3xl font-serif text-white">14 Rituals</div>
+                        <div class="text-xs text-gray-400 mt-1">Since joining Stackly Atelier</div>
+                    </div>
+                    <div class="stat-card fade-up delay-2">
+                        <div class="text-[10px] uppercase tracking-widest text-brand-accent mb-2 font-semibold">Loyalty Balance</div>
+                        <div class="text-2xl sm:text-3xl font-serif text-white">1,450 pts</div>
+                        <div class="text-xs text-emerald-400 mt-1 font-medium">₹1,450 redeemable credit</div>
+                    </div>
+                    <div class="stat-card fade-up delay-3">
+                        <div class="text-[10px] uppercase tracking-widest text-brand-accent mb-2 font-semibold">Favorite Stylist</div>
+                        <div class="text-2xl sm:text-3xl font-serif text-white">Elena M.</div>
+                        <div class="text-xs text-gray-400 mt-1">10 color rituals completed</div>
+                    </div>
+                    <div class="stat-card fade-up delay-3">
+                        <div class="text-[10px] uppercase tracking-widest text-brand-accent mb-2 font-semibold">Member Savings</div>
+                        <div class="text-2xl sm:text-3xl font-serif text-white">₹4,200</div>
+                        <div class="text-xs text-gray-400 mt-1">Via Atelier member discounts</div>
+                    </div>
+                </div>
+
+                <!-- Recent Treatments Table -->
+                <div class="panel-card p-6 mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="font-serif text-xl text-white">Treatment History & Invoices</h3>
+                            <p class="text-xs text-gray-400">Past salon sessions and downloadable receipts</p>
+                        </div>
+                        <button onclick="switchTab('orders')" class="btn-ghost text-xs">View All</button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Treatment Service</th>
+                                    <th>Artisan</th>
+                                    <th>Formulation Notes</th>
+                                    <th>Status</th>
+                                    <th>Fee</th>
+                                    <th>Receipt</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="font-medium text-white">Sep 12, 2026</td>
+                                    <td class="font-bold text-white">Illuminating Gloss & Blowout</td>
+                                    <td class="text-brand-accent">Elena Moreau</td>
+                                    <td>Wella Illumina 8/69 with 1.9% Pastel</td>
+                                    <td><span class="badge badge-green">Completed</span></td>
+                                    <td class="font-bold text-white">₹3,200</td>
+                                    <td><button class="btn-ghost text-xs py-1 px-2.5" onclick="window.location.href='404.html'">PDF</button></td>
+                                </tr>
+                                <tr>
+                                    <td class="font-medium text-white">Jul 18, 2026</td>
+                                    <td class="font-bold text-white">The Signature Cut & Style</td>
+                                    <td class="text-brand-accent">Julian Reyes</td>
+                                    <td>Architectural Face Framing, Lived-in Texture</td>
+                                    <td><span class="badge badge-green">Completed</span></td>
+                                    <td class="font-bold text-white">₹2,500</td>
+                                    <td><button class="btn-ghost text-xs py-1 px-2.5" onclick="window.location.href='404.html'">PDF</button></td>
+                                </tr>
+                                <tr>
+                                    <td class="font-medium text-white">May 04, 2026</td>
+                                    <td class="font-bold text-white">Scalp Detoxification Ritual</td>
+                                    <td class="text-brand-accent">Marcus Chen</td>
+                                    <td>Micro-exfoliation & Organic Steam Infusion</td>
+                                    <td><span class="badge badge-green">Completed</span></td>
+                                    <td class="font-bold text-white">₹1,800</td>
+                                    <td><button class="btn-ghost text-xs py-1 px-2.5" onclick="window.location.href='404.html'">PDF</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= TAB: APPOINTMENTS ================= -->
+            <div id="tab-orders" class="tab-panel">
+                <div class="panel-card p-6 mb-6">
+                    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                        <div>
+                            <h2 class="font-serif text-2xl text-white">My Appointments & Bookings</h2>
+                            <p class="text-xs text-gray-400">View upcoming chair reservations and complete salon history</p>
+                        </div>
+                        <button onclick="switchTab('catalog')" class="btn-primary">Reserve New Appointment</button>
+                    </div>
+
+                    <!-- Appointment Cards List -->
+                    <div class="space-y-4">
+                        <!-- Upcoming Card -->
+                        <div class="p-5 rounded-2xl bg-white/5 border border-brand-green/30 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div>
+                                <span class="badge badge-yellow mb-2">Upcoming &bull; Oct 24, 2026 &bull; 03:00 PM</span>
+                                <h3 class="font-serif text-xl text-white">Bespoke Balayage & Illuminating Gloss</h3>
+                                <p class="text-xs text-gray-400 mt-1">Artisan: Elena Moreau &bull; Station 1 &bull; Duration: 3.0 Hours &bull; Total: ₹6,500</p>
+                            </div>
+                            <div class="flex gap-2.5">
+                                <button onclick="window.location.href='404.html'" class="btn-ghost text-xs">Reschedule</button>
+                                <button onclick="window.location.href='404.html'" class="btn-primary text-xs">View Details</button>
+                            </div>
+                        </div>
+
+                        <!-- Past 1 -->
+                        <div class="p-5 rounded-2xl bg-white/5 border border-white/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div>
+                                <span class="badge badge-green mb-2">Completed &bull; Sep 12, 2026</span>
+                                <h3 class="font-serif text-xl text-white">Illuminating Gloss & Blowout</h3>
+                                <p class="text-xs text-gray-400 mt-1">Artisan: Elena Moreau &bull; Total: ₹3,200</p>
+                            </div>
+                            <div class="flex gap-2.5">
+                                <button onclick="window.location.href='404.html'" class="btn-primary text-xs">Book Again</button>
+                                <button onclick="window.location.href='404.html'" class="btn-ghost text-xs">Invoice</button>
+                            </div>
+                        </div>
+
+                        <!-- Past 2 -->
+                        <div class="p-5 rounded-2xl bg-white/5 border border-white/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div>
+                                <span class="badge badge-green mb-2">Completed &bull; Jul 18, 2026</span>
+                                <h3 class="font-serif text-xl text-white">The Signature Cut & Blowout</h3>
+                                <p class="text-xs text-gray-400 mt-1">Artisan: Julian Reyes &bull; Total: ₹2,500</p>
+                            </div>
+                            <div class="flex gap-2.5">
+                                <button onclick="window.location.href='404.html'" class="btn-primary text-xs">Book Again</button>
+                                <button onclick="window.location.href='404.html'" class="btn-ghost text-xs">Invoice</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= TAB: HAIR PROFILE & DIAGNOSTIC VAULT ================= -->
+            <div id="tab-wishlist" class="tab-panel">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Diagnostic Vault -->
+                    <div class="panel-card p-6">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 rounded-full bg-brand-green/20 border border-brand-green/40 flex items-center justify-center text-brand-accent text-lg">
+                                <i class="ph-fill ph-dna"></i>
+                            </div>
+                            <div>
+                                <h2 class="font-serif text-xl text-white">Personal Hair Diagnostic Vault</h2>
+                                <p class="text-xs text-gray-400">Biological hair traits and scalp ecosystem analysis</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4 text-xs">
+                            <div class="p-3.5 rounded-xl bg-white/5 border border-white/5 flex justify-between items-center">
+                                <span class="text-gray-400">Hair Texture & Pattern</span>
+                                <span class="font-bold text-white text-sm">2B Lived-in Wave</span>
+                            </div>
+                            <div class="p-3.5 rounded-xl bg-white/5 border border-white/5 flex justify-between items-center">
+                                <span class="text-gray-400">Porosity Profile</span>
+                                <span class="font-bold text-white text-sm">Medium Porosity</span>
+                            </div>
+                            <div class="p-3.5 rounded-xl bg-white/5 border border-white/5 flex justify-between items-center">
+                                <span class="text-gray-400">Density & Strand Gauge</span>
+                                <span class="font-bold text-white text-sm">Fine-Medium, High Density</span>
+                            </div>
+                            <div class="p-3.5 rounded-xl bg-white/5 border border-white/5 flex justify-between items-center">
+                                <span class="text-gray-400">Scalp Sensitivity</span>
+                                <span class="font-bold text-emerald-400 text-sm">Low &bull; Sulfate-free Preferred</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 pt-5 border-t border-white/10">
+                            <h4 class="font-serif text-base text-white mb-2">Preserved Color Formulation</h4>
+                            <p class="text-xs text-brand-muted leading-relaxed">
+                                Base: Level 6 Natural Dark Blonde &bull; Lightener: Blonde Multi-Techniques 20 Vol &bull; Gloss: Wella Illumina 8/69 + 9/60 (Pastel ratio 1:2) &bull; Root Shadow: Level 7 Soft Neutral.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Recommended At-Home Care -->
+                    <div class="panel-card p-6">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 rounded-full bg-brand-green/20 border border-brand-green/40 flex items-center justify-center text-brand-accent text-lg">
+                                <i class="ph-fill ph-drop"></i>
+                            </div>
+                            <div>
+                                <h2 class="font-serif text-xl text-white">Artisan Home Regimen</h2>
+                                <p class="text-xs text-gray-400">Prescribed by Elena Moreau for sustained vibrancy</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="p-4 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between">
+                                <div>
+                                    <h4 class="font-bold text-white text-sm">Olaplex No. 3 Hair Perfector</h4>
+                                    <p class="text-xs text-gray-400 mt-0.5">Weekly bond builder before wash</p>
+                                </div>
+                                <span class="badge badge-olive">Step 1</span>
+                            </div>
+
+                            <div class="p-4 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between">
+                                <div>
+                                    <h4 class="font-bold text-white text-sm">Davines Purifying Scalp Wash</h4>
+                                    <p class="text-xs text-gray-400 mt-0.5">Bi-weekly micro-exfoliation</p>
+                                </div>
+                                <span class="badge badge-olive">Step 2</span>
+                            </div>
+
+                            <div class="p-4 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between">
+                                <div>
+                                    <h4 class="font-bold text-white text-sm">Oribe Gold Lust Nourishing Hair Oil</h4>
+                                    <p class="text-xs text-gray-400 mt-0.5">Daily mid-length & ends moisture lock</p>
+                                </div>
+                                <span class="badge badge-olive">Step 3</span>
+                            </div>
+                        </div>
+
+                        <button onclick="window.location.href='404.html'" class="btn-primary w-full mt-6 justify-center">
+                            Order Home Regimen (₹9,800)
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= TAB: TREATMENT MENU & CATALOG ================= -->
+            <div id="tab-catalog" class="tab-panel">
+                <div class="panel-card p-6 mb-6">
+                    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                        <div>
+                            <h2 class="font-serif text-2xl text-white">Curated Treatment Menu</h2>
+                            <p class="text-xs text-gray-400">Book direct appointments with Salem's master hair artisans</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Service 1 -->
+                        <div class="treatment-menu-card p-5 flex flex-col justify-between">
+                            <div>
+                                <span class="badge badge-olive mb-2">Structural Cutting</span>
+                                <h3 class="font-serif text-xl text-white mb-1">The Signature Cut</h3>
+                                <p class="text-xs text-gray-400 leading-relaxed mb-4">Architectural consultation, clarifying wash, precision cut, and bespoke blowout.</p>
+                            </div>
+                            <div class="pt-4 border-t border-white/10 flex justify-between items-center">
+                                <span class="font-bold text-white">₹2,500</span>
+                                <button onclick="quickBookTreatment('The Signature Cut', 'Julian Reyes')" class="btn-primary text-xs">Reserve Chair</button>
+                            </div>
+                        </div>
+
+                        <!-- Service 2 -->
+                        <div class="treatment-menu-card p-5 flex flex-col justify-between">
+                            <div>
+                                <span class="badge badge-olive mb-2">Color Architecture</span>
+                                <h3 class="font-serif text-xl text-white mb-1">Bespoke Balayage</h3>
+                                <p class="text-xs text-gray-400 leading-relaxed mb-4">Hand-painted multi-dimensional highlights tailored to bone structure with bond shield.</p>
+                            </div>
+                            <div class="pt-4 border-t border-white/10 flex justify-between items-center">
+                                <span class="font-bold text-white">₹6,500</span>
+                                <button onclick="quickBookTreatment('Bespoke Balayage', 'Elena Moreau')" class="btn-primary text-xs">Reserve Chair</button>
+                            </div>
+                        </div>
+
+                        <!-- Service 3 -->
+                        <div class="treatment-menu-card p-5 flex flex-col justify-between">
+                            <div>
+                                <span class="badge badge-olive mb-2">Cellular Therapy</span>
+                                <h3 class="font-serif text-xl text-white mb-1">Scalp Detoxification</h3>
+                                <p class="text-xs text-gray-400 leading-relaxed mb-4">Micro-exfoliating treatment removing buildup, stimulating follicles with steam infusion.</p>
+                            </div>
+                            <div class="pt-4 border-t border-white/10 flex justify-between items-center">
+                                <span class="font-bold text-white">₹1,800</span>
+                                <button onclick="quickBookTreatment('Scalp Detoxification', 'Marcus Chen')" class="btn-primary text-xs">Reserve Chair</button>
+                            </div>
+                        </div>
+
+                        <!-- Service 4 -->
+                        <div class="treatment-menu-card p-5 flex flex-col justify-between">
+                            <div>
+                                <span class="badge badge-green mb-2">Signature Package</span>
+                                <h3 class="font-serif text-xl text-white mb-1">The Complete Canvas</h3>
+                                <p class="text-xs text-gray-400 leading-relaxed mb-4">4.5-hour overhaul: Consultation, restyle cut, full color placement & bond repair ritual.</p>
+                            </div>
+                            <div class="pt-4 border-t border-white/10 flex justify-between items-center">
+                                <span class="font-bold text-white">₹9,500</span>
+                                <button onclick="quickBookTreatment('The Complete Canvas', 'Elena Moreau')" class="btn-primary text-xs">Reserve Chair</button>
+                            </div>
+                        </div>
+
+                        <!-- Service 5 -->
+                        <div class="treatment-menu-card p-5 flex flex-col justify-between">
+                            <div>
+                                <span class="badge badge-olive mb-2">Bond Repair</span>
+                                <h3 class="font-serif text-xl text-white mb-1">Bond Repair Ritual</h3>
+                                <p class="text-xs text-gray-400 leading-relaxed mb-4">Relinking broken disulfide bonds using advanced molecular technology for restored resilience.</p>
+                            </div>
+                            <div class="pt-4 border-t border-white/10 flex justify-between items-center">
+                                <span class="font-bold text-white">₹2,500</span>
+                                <button onclick="quickBookTreatment('Bond Repair Ritual', 'Priya Sharma')" class="btn-primary text-xs">Reserve Chair</button>
+                            </div>
+                        </div>
+
+                        <!-- Service 6 -->
+                        <div class="treatment-menu-card p-5 flex flex-col justify-between">
+                            <div>
+                                <span class="badge badge-olive mb-2">Hydration Mask</span>
+                                <h3 class="font-serif text-xl text-white mb-1">Liquid Glass Mask</h3>
+                                <p class="text-xs text-gray-400 leading-relaxed mb-4">Ceramide steam therapy creating mirror-like luminous reflection and deep moisture.</p>
+                            </div>
+                            <div class="pt-4 border-t border-white/10 flex justify-between items-center">
+                                <span class="font-bold text-white">₹1,500</span>
+                                <button onclick="quickBookTreatment('Liquid Glass Mask', 'Julian Reyes')" class="btn-primary text-xs">Reserve Chair</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= TAB: BLOG / JOURNAL LOOKS ================= -->
+            <div id="tab-blog" class="tab-panel">
+                <div class="panel-card p-6 mb-6">
+                    <h2 class="font-serif text-2xl text-white mb-2">Saved Looks & Style Chronicles</h2>
+                    <p class="text-xs text-gray-400 mb-6">Trend analysis and styling wisdom from Stackly artisans</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="treatment-menu-card p-4">
+                            <img src="images/photo-1519699047748-de8e457a634e.webp" class="w-full aspect-[4/3] object-cover rounded-xl mb-3" alt="Undone wave">
+                            <span class="text-[10px] text-brand-accent uppercase tracking-widest font-bold">Styling / Texture</span>
+                            <h3 class="font-serif text-lg text-white mt-1 mb-2">Mastering the Undone Wave</h3>
+                            <p class="text-xs text-gray-400 line-clamp-2">Lived-in movement without heat degradation. Recommended by Julian Reyes.</p>
+                        </div>
+                        <div class="treatment-menu-card p-4">
+                            <img src="images/hair_balayage_brunette.webp" class="w-full aspect-[4/3] object-cover rounded-xl mb-3" alt="Color care">
+                            <span class="text-[10px] text-brand-accent uppercase tracking-widest font-bold">Color Care</span>
+                            <h3 class="font-serif text-lg text-white mt-1 mb-2">Prolonging Salon Vibrancy</h3>
+                            <p class="text-xs text-gray-400 line-clamp-2">Maintain the depth and shine of bespoke balayage between salon appointments.</p>
+                        </div>
+                        <div class="treatment-menu-card p-4">
+                            <img src="images/botanical_scalp_ritual.webp" class="w-full aspect-[4/3] object-cover rounded-xl mb-3" alt="Scalp wellness">
+                            <span class="text-[10px] text-brand-accent uppercase tracking-widest font-bold">Scalp Wellness</span>
+                            <h3 class="font-serif text-lg text-white mt-1 mb-2">The Foundation of Volume</h3>
+                            <p class="text-xs text-gray-400 line-clamp-2">Why structural hair health originates at the root follicle microbiome.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= TAB: SUPPORT / CONSULTATION ================= -->
+            <div id="tab-support" class="tab-panel">
+                <div class="panel-card p-6 max-w-2xl mx-auto">
+                    <h2 class="font-serif text-2xl text-white mb-2">Stylist Consultation & Concierge</h2>
+                    <p class="text-xs text-gray-400 mb-6">Ask your stylist a formulation question or submit a photo for consultation</p>
+
+                    <div id="sup-success" class="alert-success mb-5 hidden">
+                        <i class="fa-solid fa-circle-check"></i> Inquiry sent to your assigned artisan! Response expected within 2 hours.
+                    </div>
+
+                    <form onsubmit="handleSupportSubmit(event)" class="space-y-4">
+                        <div>
+                            <label class="form-label">Inquiry Category</label>
+                            <select id="sup-cat" class="form-input">
+                                <option value="">Select Category</option>
+                                <option value="pre-appointment">Pre-Appointment Hair Consultation</option>
+                                <option value="color-formula">Color Formulation / Toning Question</option>
+                                <option value="reschedule">Schedule Modification Request</option>
+                                <option value="home-care">Home Product Regimen Advice</option>
+                            </select>
+                            <span class="error-msg" id="sup-cat-err">Please select a category.</span>
+                        </div>
+
+                        <div>
+                            <label class="form-label">Inquiry Subject</label>
+                            <input type="text" id="sup-subject" class="form-input" placeholder="e.g. Balayage gloss touch-up timing">
+                            <span class="error-msg" id="sup-subject-err">Subject must be at least 5 characters.</span>
+                        </div>
+
+                        <div>
+                            <label class="form-label">Detailed Notes or Questions</label>
+                            <textarea id="sup-msg" rows="4" class="form-input" placeholder="Describe your hair concerns, current routine, or schedule request..."></textarea>
+                            <span class="error-msg" id="sup-msg-err">Please provide at least 15 characters of detail.</span>
+                        </div>
+
+                        <button type="submit" class="btn-primary w-full justify-center">Submit Consultation Inquiry</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ================= TAB: PROFILE & PREFERENCES ================= -->
+            <div id="tab-profile" class="tab-panel">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Profile Details -->
+                    <div class="panel-card p-6">
+                        <h2 class="font-serif text-xl text-white mb-1">Personal Details & Preferences</h2>
+                        <p class="text-xs text-gray-400 mb-6">Update contact info and preferred salon station settings</p>
+
+                        <div id="profile-success" class="alert-success mb-5 hidden">
+                            <i class="fa-solid fa-circle-check"></i> Personal profile updated successfully!
+                        </div>
+
+                        <form onsubmit="updateProfile(event)" class="space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="form-label">First Name</label>
+                                    <input type="text" id="p-fname" class="form-input" value="Elena">
+                                    <span class="error-msg" id="p-fname-err">First name is required.</span>
+                                </div>
+                                <div>
+                                    <label class="form-label">Last Name</label>
+                                    <input type="text" id="p-lname" class="form-input" value="Vance">
+                                    <span class="error-msg" id="p-lname-err">Last name is required.</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="form-label">Email Address</label>
+                                <input type="email" id="p-email" class="form-input" value="client@stackly.in">
+                                <span class="error-msg" id="p-email-err">Please enter a valid email.</span>
+                            </div>
+
+                            <div>
+                                <label class="form-label">Phone Number</label>
+                                <input type="tel" id="p-phone" class="form-input" value="9876543210">
+                                <span class="error-msg" id="p-phone-err">Please enter a valid 10-digit number.</span>
+                            </div>
+
+                            <div>
+                                <label class="form-label">Preferred Artisan</label>
+                                <select class="form-input">
+                                    <option value="Elena Moreau" selected>Elena Moreau (Balayage & Color)</option>
+                                    <option value="Julian Reyes">Julian Reyes (Structural Cut Lead)</option>
+                                    <option value="Marcus Chen">Marcus Chen (Scalp & Trichology)</option>
+                                    <option value="Priya Sharma">Priya Sharma (Texture & Waves)</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" id="btn-save-profile" class="btn-primary mt-2">Save Profile Preferences</button>
+                        </form>
+                    </div>
+
+                    <!-- Change Password -->
+                    <div class="panel-card p-6">
+                        <h2 class="font-serif text-xl text-white mb-1">Security & Password</h2>
+                        <p class="text-xs text-gray-400 mb-6">Manage your client portal password and account security</p>
+
+                        <div id="pw-success" class="alert-success mb-5 hidden">
+                            <i class="fa-solid fa-circle-check"></i> Password updated successfully!
+                        </div>
+
+                        <form onsubmit="changePassword(event)" class="space-y-4">
+                            <div>
+                                <label class="form-label">Current Password</label>
+                                <input type="password" id="curr-pw" class="form-input" placeholder="••••••••">
+                                <span class="error-msg" id="curr-pw-err">Current password is required.</span>
+                            </div>
+
+                            <div>
+                                <label class="form-label">New Password</label>
+                                <input type="password" id="new-pw" class="form-input" placeholder="Minimum 8 characters">
+                                <span class="error-msg" id="new-pw-err">Password must be at least 8 characters.</span>
+                            </div>
+
+                            <div>
+                                <label class="form-label">Confirm New Password</label>
+                                <input type="password" id="conf-pw" class="form-input" placeholder="Repeat new password">
+                                <span class="error-msg" id="conf-pw-err">Passwords do not match.</span>
+                            </div>
+
+                            <button type="submit" class="btn-primary mt-2">Update Password</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Script Logic -->
+    <script src="validation.js"></script>
+    <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            const target = document.getElementById('tab-' + tabId);
+            if (target) target.classList.add('active');
+
+            document.querySelectorAll('.sidebar .nav-item').forEach(i => i.classList.remove('active'));
+            const navTarget = document.getElementById('nav-' + tabId);
+            if (navTarget) navTarget.classList.add('active');
+
+            const titles = {
+                'overview': 'Atelier Overview',
+                'orders': 'My Appointments',
+                'wishlist': 'Hair Profile & Formula Vault',
+                'catalog': 'Curated Treatment Menu',
+                'blog': 'Style Journal & Looks',
+                'support': 'Stylist Consultation',
+                'profile': 'Preferences & Profile'
+            };
+            document.getElementById('topbar-title').textContent = titles[tabId] || 'Client Portal';
+
+            if (window.innerWidth < 1024) closeSidebar();
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('mobile-overlay').classList.toggle('show');
+        }
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('mobile-overlay').classList.remove('show');
+        }
+
+        function quickBookTreatment(service, artisan) {
+            window.location.href = '404.html';
+        }
+
+        function openRedeemPointsModal() {
+            window.location.href = '404.html';
+        }
+
+        function updateProfile(e) {
+            e.preventDefault();
+            const fname = document.getElementById('p-fname').value.trim();
+            const lname = document.getElementById('p-lname').value.trim();
+            const email = document.getElementById('p-email').value.trim();
+            const phone = document.getElementById('p-phone').value.trim();
+
+            let valid = true;
+            if (!fname) { document.getElementById('p-fname-err').classList.add('show'); valid = false; }
+            else { document.getElementById('p-fname-err').classList.remove('show'); }
+
+            if (!lname) { document.getElementById('p-lname-err').classList.add('show'); valid = false; }
+            else { document.getElementById('p-lname-err').classList.remove('show'); }
+
+            if (!email || !email.includes('@')) { document.getElementById('p-email-err').classList.add('show'); valid = false; }
+            else { document.getElementById('p-email-err').classList.remove('show'); }
+
+            if (!phone || phone.length < 7) { document.getElementById('p-phone-err').classList.add('show'); valid = false; }
+            else { document.getElementById('p-phone-err').classList.remove('show'); }
+
+            if (!valid) return;
+
+            const fullName = fname + ' ' + lname;
+            localStorage.setItem('name', fullName);
+            localStorage.setItem('userEmail', email);
+            localStorage.setItem('stackly_user_name', fullName);
+            localStorage.setItem('stackly_user_email', email);
+
+            document.getElementById('sidebar-name').textContent = fullName;
+            document.getElementById('welcome-name').textContent = fname;
+            document.getElementById('sidebar-email').textContent = email;
+
+            const initials = (fname[0] + (lname ? lname[0] : '')).toUpperCase();
+            document.getElementById('user-avatar-sidebar').textContent = initials;
+            document.getElementById('user-avatar-top').textContent = initials;
+
+            const succ = document.getElementById('profile-success');
+            succ.classList.remove('hidden');
+            setTimeout(() => succ.classList.add('hidden'), 3500);
+        }
+
+        function changePassword(e) {
+            e.preventDefault();
+            const curr = document.getElementById('curr-pw').value;
+            const newPw = document.getElementById('new-pw').value;
+            const conf = document.getElementById('conf-pw').value;
+
+            let valid = true;
+            if (!curr) { document.getElementById('curr-pw-err').classList.add('show'); valid = false; }
+            else { document.getElementById('curr-pw-err').classList.remove('show'); }
+
+            if (!newPw || newPw.length < 8) { document.getElementById('new-pw-err').classList.add('show'); valid = false; }
+            else { document.getElementById('new-pw-err').classList.remove('show'); }
+
+            if (!conf || conf !== newPw) { document.getElementById('conf-pw-err').classList.add('show'); valid = false; }
+            else { document.getElementById('conf-pw-err').classList.remove('show'); }
+
+            if (!valid) return;
+
+            const succ = document.getElementById('pw-success');
+            succ.classList.remove('hidden');
+            e.target.reset();
+            setTimeout(() => succ.classList.add('hidden'), 3500);
+        }
+
+        function handleSupportSubmit(e) {
+            e.preventDefault();
+            const cat = document.getElementById('sup-cat').value;
+            const subj = document.getElementById('sup-subject').value.trim();
+            const msg = document.getElementById('sup-msg').value.trim();
+
+            let valid = true;
+            if (!cat) { document.getElementById('sup-cat-err').classList.add('show'); valid = false; }
+            else { document.getElementById('sup-cat-err').classList.remove('show'); }
+
+            if (!subj || subj.length < 5) { document.getElementById('sup-subject-err').classList.add('show'); valid = false; }
+            else { document.getElementById('sup-subject-err').classList.remove('show'); }
+
+            if (!msg || msg.length < 15) { document.getElementById('sup-msg-err').classList.add('show'); valid = false; }
+            else { document.getElementById('sup-msg-err').classList.remove('show'); }
+
+            if (!valid) return;
+
+            const succ = document.getElementById('sup-success');
+            succ.classList.remove('hidden');
+            e.target.reset();
+            setTimeout(() => succ.classList.add('hidden'), 4000);
+        }
+
+        function confirmSignOut(e) {
+            if (e) e.preventDefault();
+            if (confirm('Sign out of your Stackly Atelier client portal?')) {
+                window.location.href = 'login.html';
+            }
+        }
+    </script>
+</body>
+</html>
