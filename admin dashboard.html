@@ -47,6 +47,8 @@
         .sidebar {
             width: 255px;
             height: 100vh;
+            height: 100dvh;
+            max-height: 100vh;
             background: var(--panel);
             border-right: 1px solid var(--border);
             display: flex;
@@ -55,6 +57,7 @@
             top: 0;
             left: 0;
             z-index: 50;
+            overflow: hidden;
             transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
@@ -65,6 +68,36 @@
             align-items: center;
             justify-content: space-between;
             background: rgba(255,255,255,0.01);
+            flex-shrink: 0;
+        }
+
+        .sidebar-nav {
+            flex: 1 1 0% !important;
+            min-height: 0 !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(163, 169, 158, 0.3) transparent;
+        }
+
+        .sidebar-nav::-webkit-scrollbar {
+            width: 5px;
+        }
+        .sidebar-nav::-webkit-scrollbar-track {
+            background: rgba(10, 11, 14, 0.5);
+        }
+        .sidebar-nav::-webkit-scrollbar-thumb {
+            background: #2a2f3b;
+            border-radius: 10px;
+        }
+        .sidebar-nav::-webkit-scrollbar-thumb:hover {
+            background: #4f5945;
+        }
+
+        .sidebar-footer {
+            flex-shrink: 0;
         }
 
         .nav-item {
@@ -395,7 +428,7 @@
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
         <!-- Logo -->
-        <div class="sidebar-logo">
+        <div class="sidebar-logo flex-shrink-0">
             <a href="index.html" class="flex items-center gap-2 hover:opacity-80 transition-opacity" title="Return to Salon Website">
                 <img src="images/stackly logo.webp" alt="Stackly Logo" class="h-8 w-auto object-contain">
             </a>
@@ -405,7 +438,7 @@
         </div>
 
         <!-- Nav Links -->
-        <nav class="flex-1 overflow-y-auto py-3">
+        <nav class="sidebar-nav py-3" style="flex: 1 1 0%; min-height: 0; overflow-y: auto;">
             <div class="nav-section-label">Studio Command</div>
             <a href="javascript:void(0)" class="nav-item active" id="nav-overview" onclick="switchSection('overview')">
                 <i class="fa-solid fa-chart-pie"></i> Dashboard Overview
@@ -461,7 +494,7 @@
         </nav>
 
         <!-- Sidebar Footer -->
-        <div class="border-t border-white/10 p-3.5 bg-[#0a0c10]">
+        <div class="border-t border-white/10 p-3.5 bg-[#0a0c10] flex-shrink-0 sidebar-footer">
             <div class="flex items-center gap-3">
                 <div class="avatar bg-brand-green text-white font-serif admin-avatar-initial" id="admin-avatar-sidebar">D</div>
                 <div class="flex-1 min-w-0">

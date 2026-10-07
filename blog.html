@@ -133,6 +133,16 @@
             transform: scale(1.05);
         }
 
+        /* Borderless clean article cards */
+        article, article * {
+            outline: none !important;
+            -webkit-tap-highlight-color: transparent;
+        }
+        article:hover, article:focus, article:active {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
         /* Responsive Header Logo */
         #header-logo {
             max-width: calc(100% - 165px);
@@ -354,7 +364,7 @@
         <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-16">
             
             <!-- Article 1 -->
-            <article class="group cursor-pointer slide-up flex flex-col">
+            <article onclick="window.location.href='404.html'" class="group cursor-pointer slide-up flex flex-col">
                 <div class="img-hover-zoom aspect-[4/3] w-full mb-6 bg-brand-dark/5">
                     <img src="images/hair_balayage_brunette.webp" alt="Color Maintenance" class="w-full h-full object-cover">
                 </div>
@@ -365,11 +375,18 @@
                     </div>
                     <h3 class="font-serif text-2xl sm:text-3xl mb-3 group-hover:text-brand-green transition-colors leading-tight">Preserving Salon Radiance at Home</h3>
                     <p class="text-sm text-brand-muted line-clamp-3 leading-relaxed mb-6">Learn the essential product regimens and washing rituals necessary to prevent oxidation and keep your bespoke color vibrant.</p>
+                    <div class="mt-auto pt-4 border-t border-brand-dark/10 flex items-center justify-between">
+                        <span class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-brand-dark group-hover:text-brand-green transition-colors">
+                            <span>Read More</span>
+                            <i class="ph ph-arrow-right transition-transform group-hover:translate-x-1.5"></i>
+                        </span>
+                        <span class="text-[11px] text-brand-muted tracking-wide font-sans group-hover:text-brand-dark transition-colors">Full Story</span>
+                    </div>
                 </div>
             </article>
 
             <!-- Article 2 -->
-            <article class="group cursor-pointer slide-up delay-100 flex flex-col">
+            <article onclick="window.location.href='404.html'" class="group cursor-pointer slide-up delay-100 flex flex-col">
                 <div class="img-hover-zoom aspect-[4/3] w-full mb-6 bg-brand-dark/5">
                     <img src="images/photo-1522337660859-02fbefca4702.webp" alt="Texture Styling" class="w-full h-full object-cover">
                 </div>
@@ -380,11 +397,18 @@
                     </div>
                     <h3 class="font-serif text-2xl sm:text-3xl mb-3 group-hover:text-brand-green transition-colors leading-tight">Embracing Organic Texture</h3>
                     <p class="text-sm text-brand-muted line-clamp-3 leading-relaxed mb-6">Move away from excessive heat. A guide to air-drying and diffusing techniques that celebrate your hair's natural architectural form.</p>
+                    <div class="mt-auto pt-4 border-t border-brand-dark/10 flex items-center justify-between">
+                        <span class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-brand-dark group-hover:text-brand-green transition-colors">
+                            <span>Read More</span>
+                            <i class="ph ph-arrow-right transition-transform group-hover:translate-x-1.5"></i>
+                        </span>
+                        <span class="text-[11px] text-brand-muted tracking-wide font-sans group-hover:text-brand-dark transition-colors">Full Story</span>
+                    </div>
                 </div>
             </article>
 
             <!-- Article 3 -->
-            <article class="group cursor-pointer slide-up delay-200 flex flex-col">
+            <article onclick="window.location.href='404.html'" class="group cursor-pointer slide-up delay-200 flex flex-col">
                 <div class="img-hover-zoom aspect-[4/3] w-full mb-6 bg-brand-dark/5">
                     <img src="images/botanical_scalp_ritual.webp" alt="Scalp Treatment" class="w-full h-full object-cover">
                 </div>
@@ -395,11 +419,18 @@
                     </div>
                     <h3 class="font-serif text-2xl sm:text-3xl mb-3 group-hover:text-brand-green transition-colors leading-tight">The Foundation of Thicker Hair</h3>
                     <p class="text-sm text-brand-muted line-clamp-3 leading-relaxed mb-6">Why true hair vitality begins at the cellular level, and how targeted scalp exfoliation transforms density and growth.</p>
+                    <div class="mt-auto pt-4 border-t border-brand-dark/10 flex items-center justify-between">
+                        <span class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-brand-dark group-hover:text-brand-green transition-colors">
+                            <span>Read More</span>
+                            <i class="ph ph-arrow-right transition-transform group-hover:translate-x-1.5"></i>
+                        </span>
+                        <span class="text-[11px] text-brand-muted tracking-wide font-sans group-hover:text-brand-dark transition-colors">Full Story</span>
+                    </div>
                 </div>
             </article>
 
             <!-- Article 4 -->
-            <article class="group cursor-pointer slide-up flex flex-col">
+            <article onclick="window.location.href='404.html'" class="group cursor-pointer slide-up flex flex-col">
                 <div class="img-hover-zoom aspect-[4/3] w-full mb-6 bg-brand-dark/5">
                     <img src="images/stylist_precision_cut.webp" alt="Salon Tools" class="w-full h-full object-cover">
                 </div>
@@ -410,11 +441,18 @@
                     </div>
                     <h3 class="font-serif text-2xl sm:text-3xl mb-3 group-hover:text-brand-green transition-colors leading-tight">The Anatomy of Our Shears</h3>
                     <p class="text-sm text-brand-muted line-clamp-3 leading-relaxed mb-6">An intimate look at the bespoke Japanese steel tools our artisans use to construct structurally flawless haircuts.</p>
+                    <div class="mt-auto pt-4 border-t border-brand-dark/10 flex items-center justify-between">
+                        <span class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-brand-dark group-hover:text-brand-green transition-colors">
+                            <span>Read More</span>
+                            <i class="ph ph-arrow-right transition-transform group-hover:translate-x-1.5"></i>
+                        </span>
+                        <span class="text-[11px] text-brand-muted tracking-wide font-sans group-hover:text-brand-dark transition-colors">Full Story</span>
+                    </div>
                 </div>
             </article>
 
             <!-- Article 5 -->
-            <article class="group cursor-pointer slide-up delay-100 flex flex-col">
+            <article onclick="window.location.href='404.html'" class="group cursor-pointer slide-up delay-100 flex flex-col">
                 <div class="img-hover-zoom aspect-[4/3] w-full mb-6 bg-brand-dark/5">
                     <img src="images/editorial_hair_updo.webp" alt="Bold Styling" class="w-full h-full object-cover">
                 </div>
@@ -425,11 +463,18 @@
                     </div>
                     <h3 class="font-serif text-2xl sm:text-3xl mb-3 group-hover:text-brand-green transition-colors leading-tight">The Return of the Blunt Bob</h3>
                     <p class="text-sm text-brand-muted line-clamp-3 leading-relaxed mb-6">Sharp lines and unwavering structure. Exploring the season's most requested, high-impact silhouette.</p>
+                    <div class="mt-auto pt-4 border-t border-brand-dark/10 flex items-center justify-between">
+                        <span class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-brand-dark group-hover:text-brand-green transition-colors">
+                            <span>Read More</span>
+                            <i class="ph ph-arrow-right transition-transform group-hover:translate-x-1.5"></i>
+                        </span>
+                        <span class="text-[11px] text-brand-muted tracking-wide font-sans group-hover:text-brand-dark transition-colors">Full Story</span>
+                    </div>
                 </div>
             </article>
 
             <!-- Article 6 -->
-            <article class="group cursor-pointer slide-up delay-200 flex flex-col">
+            <article onclick="window.location.href='404.html'" class="group cursor-pointer slide-up delay-200 flex flex-col">
                 <div class="img-hover-zoom aspect-[4/3] w-full mb-6 bg-brand-dark/5">
                     <img src="images/luxury_hair_products.webp" alt="Clean Products" class="w-full h-full object-cover">
                 </div>
@@ -440,14 +485,21 @@
                     </div>
                     <h3 class="font-serif text-2xl sm:text-3xl mb-3 group-hover:text-brand-green transition-colors leading-tight">Decoding Clean Chemistry</h3>
                     <p class="text-sm text-brand-muted line-clamp-3 leading-relaxed mb-6">Understanding the real difference between silicones and plant-peptides in maintaining long-term hair elasticity.</p>
+                    <div class="mt-auto pt-4 border-t border-brand-dark/10 flex items-center justify-between">
+                        <span class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-brand-dark group-hover:text-brand-green transition-colors">
+                            <span>Read More</span>
+                            <i class="ph ph-arrow-right transition-transform group-hover:translate-x-1.5"></i>
+                        </span>
+                        <span class="text-[11px] text-brand-muted tracking-wide font-sans group-hover:text-brand-dark transition-colors">Full Story</span>
+                    </div>
                 </div>
             </article>
         </div>
 
         <div class="text-center mt-20 slide-up">
-            <button class="inline-flex items-center gap-3 border border-brand-dark px-10 py-4 hover:bg-brand-dark hover:text-brand-light transition-colors uppercase tracking-widest text-xs font-medium">
-                Load More Articles
-            </button>
+            <a href="404.html" class="inline-flex items-center gap-3 border border-brand-dark px-10 py-4 hover:bg-brand-dark hover:text-brand-light transition-colors uppercase tracking-widest text-xs font-medium">
+                Load More Articles <i class="ph ph-arrow-right"></i>
+            </a>
         </div>
     </section>
 

@@ -10,7 +10,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <script>
@@ -44,33 +43,39 @@
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
             min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: #141414; }
         ::-webkit-scrollbar-thumb { background: #4f5945; border-radius: 10px; }
 
-        /* Giant 404 background */
+        /* Giant 404 background watermark */
         .giant-404 {
             position: absolute;
-            top: 48%;
+            top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             font-family: 'Playfair Display', serif;
-            font-size: clamp(12rem, 36vw, 32rem);
+            font-size: clamp(8rem, 32vw, 24rem);
             font-weight: 700;
             line-height: 1;
-            -webkit-text-stroke: 1.5px rgba(244, 243, 237, 0.06);
+            -webkit-text-stroke: 1.5px rgba(244, 243, 237, 0.05);
             color: transparent;
             white-space: nowrap;
             pointer-events: none;
             user-select: none;
             animation: floatBg 10s ease-in-out infinite;
             letter-spacing: -0.02em;
+            z-index: 1;
         }
         @keyframes floatBg {
             0%, 100% { transform: translate(-50%, -50%) translateY(0px); }
-            50% { transform: translate(-50%, -50%) translateY(-15px); }
+            50% { transform: translate(-50%, -50%) translateY(-12px); }
         }
 
         /* Floating scissors animation */
@@ -79,12 +84,12 @@
         }
         @keyframes shearsFloat {
             0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-12px) rotate(8deg); }
+            50% { transform: translateY(-10px) rotate(8deg); }
         }
 
         /* Subtle scanline */
         .scanline {
-            position: absolute;
+            position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: repeating-linear-gradient(
                 0deg,
@@ -94,7 +99,7 @@
                 rgba(244, 243, 237, 0.008) 4px
             );
             pointer-events: none;
-            z-index: 1;
+            z-index: 2;
         }
 
         /* Quick links */
@@ -102,7 +107,7 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            padding: 0.75rem 1.4rem;
+            padding: 0.75rem 1.35rem;
             border: 1px solid rgba(244, 243, 237, 0.15);
             border-radius: 9999px;
             font-size: 0.75rem;
@@ -111,12 +116,16 @@
             letter-spacing: 0.1em;
             transition: all 0.3s ease;
             text-decoration: none;
-            color: rgba(244, 243, 237, 0.8);
+            color: rgba(244, 243, 237, 0.85);
+            background: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(8px);
+            outline: none !important;
+            box-shadow: none !important;
         }
         .quick-link:hover {
             border-color: #4f5945;
             color: #f4f3ed;
-            background: rgba(79, 89, 69, 0.2);
+            background: rgba(79, 89, 69, 0.25);
             transform: translateY(-2px);
         }
         .quick-link-primary {
@@ -128,15 +137,8 @@
             background: #3e4636;
             border-color: #3e4636;
             color: #f4f3ed;
-            box-shadow: 0 4px 15px rgba(79, 89, 69, 0.4);
+            box-shadow: 0 4px 15px rgba(79, 89, 69, 0.4) !important;
         }
-
-        /* Ticker */
-        @keyframes ticker {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-        .ticker-move { animation: ticker 28s linear infinite; display: inline-block; white-space: nowrap; }
 
         /* Fade-in */
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
@@ -153,259 +155,103 @@
             color: #f4f3ed;
             padding: 0.85rem 1.25rem 0.85rem 3rem;
             border-radius: 9999px;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             outline: none;
             transition: all 0.3s ease;
             width: 100%;
-            max-width: 520px;
         }
         .salon-search-input:focus {
             border-color: #4f5945;
             background: #242424;
             box-shadow: 0 0 0 3px rgba(79, 89, 69, 0.25);
         }
-
-        /* Treatment card hover */
-        .treatment-card {
-            background: #1a1a1a;
-            border: 1px solid rgba(244, 243, 237, 0.08);
-            border-radius: 16px;
-            padding: 1.5rem;
-            transition: all 0.35s ease;
-        }
-        .treatment-card:hover {
-            border-color: #4f5945;
-            transform: translateY(-4px);
-            background: #202020;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-        }
     </style>
 </head>
-<body>
+<body class="selection:bg-brand-green selection:text-brand-light">
 
-    <!-- Subtle scanline -->
+    <!-- Subtle atmospheric scanline -->
     <div class="scanline"></div>
 
-    <!-- HEADER -->
-    <header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-4 sm:px-6 md:px-12 py-3.5 sm:py-5 bg-[#141414]/90 backdrop-blur-md border-b border-brand-light/10 text-brand-light transition-all duration-300" id="header">
-        <nav class="hidden lg:flex space-x-8 text-xs uppercase tracking-[0.2em] font-medium items-center">
-            <a href="index.html" class="hover:text-brand-accent transition-colors">Home</a>
-            <a href="services.html" class="hover:text-brand-accent transition-colors">Treatments</a>
-            <a href="about.html" class="hover:text-brand-accent transition-colors">Artisans</a>
-        </nav>
-
-        <div class="absolute left-1/2 transform -translate-x-1/2 flex items-center pointer-events-auto">
-            <a href="index.html" class="flex flex-col items-center group" title="Stackly Home">
-                <img src="images/stackly logo.webp" alt="Stackly Aesthetics Logo" class="h-6 sm:h-8 md:h-10 max-w-[95px] sm:max-w-none w-auto object-contain transition-transform duration-300 group-hover:scale-105">
-            </a>
-        </div>
-
-        <nav class="hidden lg:flex space-x-8 text-xs uppercase tracking-[0.2em] font-medium items-center">
-            <a href="blog.html" class="hover:text-brand-accent transition-colors">Journal</a>
-            <a href="login.html" class="hover:text-brand-accent transition-colors">Sign In</a>
-            <a href="signup.html" class="border border-brand-accent/40 text-brand-light px-4 py-2 rounded-full hover:bg-brand-light hover:text-brand-dark transition-all duration-300 text-[10px]">Atelier Club</a>
-        </nav>
-
-        <button id="mobile-menu-btn" class="lg:hidden text-2xl text-brand-light hover:text-brand-accent focus:outline-none transition-colors ml-auto z-50 bg-transparent border-none cursor-pointer" aria-label="Toggle Menu">
-            <i class="ph ph-list"></i>
-        </button>
-    </header>
-
-    <!-- Mobile Menu Overlay -->
-    <div id="mobile-menu" class="fixed inset-0 z-40 flex flex-col justify-center items-center opacity-0 pointer-events-none transition-opacity duration-300 bg-[#141414]/98 p-6">
-        <button id="mobile-close-btn" class="absolute top-6 right-6 text-3xl text-brand-light focus:outline-none bg-transparent border-none cursor-pointer">
-            <i class="ph ph-x"></i>
-        </button>
-        <nav class="flex flex-col space-y-6 text-xl font-serif text-center font-medium">
-            <a href="index.html" class="hover:text-brand-accent transition-colors">Home</a>
-            <a href="services.html" class="hover:text-brand-accent transition-colors">Curated Treatments</a>
-            <a href="about.html" class="hover:text-brand-accent transition-colors">Master Artisans</a>
-            <a href="blog.html" class="hover:text-brand-accent transition-colors">Style Chronicles</a>
-            <a href="contact.html" class="hover:text-brand-accent transition-colors">Contact & Location</a>
-            <a href="login.html" class="hover:text-brand-accent transition-colors">Sign In</a>
-            <a href="signup.html" class="hover:text-brand-accent transition-colors">Create Account</a>
-        </nav>
-        <div class="mt-12 text-xs uppercase tracking-widest text-brand-accent text-center">
-            Salem, Tamil Nadu &bull; +91 987 654 3210
-        </div>
-    </div>
-
-    <!-- MAIN 404 CONTENT -->
-    <main class="min-h-screen flex flex-col items-center justify-center relative px-6 pt-28 pb-20">
+    <!-- MAIN 404 WRAPPER -->
+    <main class="w-full min-h-[100dvh] flex flex-col justify-between items-center relative px-4 sm:px-6 md:px-12 py-8 sm:py-12 z-10">
 
         <!-- Giant background 404 watermark -->
         <div class="giant-404" aria-hidden="true">404</div>
 
-        <!-- Foreground Content -->
-        <div class="relative z-10 flex flex-col items-center text-center max-w-2xl mx-auto">
+        <!-- Top Brand Logo -->
+        <div class="w-full flex justify-center fade-up shrink-0 pt-2 sm:pt-4">
+            <a href="index.html" class="inline-flex items-center justify-center group transition-transform duration-300 hover:scale-105" title="Stackly Home">
+                <img src="images/stackly logo.webp" alt="Stackly Aesthetics Logo" class="h-7 sm:h-9 md:h-11 w-auto object-contain filter drop-shadow">
+            </a>
+        </div>
+
+        <!-- Centered 404 Content -->
+        <div class="relative z-10 flex flex-col items-center text-center max-w-xl mx-auto my-auto py-8 sm:py-12 w-full">
 
             <!-- Floating Shears Icon -->
-            <div class="mb-6 fade-up">
-                <div class="w-20 h-20 rounded-full bg-brand-green/15 border border-brand-green/30 flex items-center justify-center text-brand-accent text-3xl shears-icon shadow-xl">
+            <div class="mb-5 sm:mb-6 fade-up">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-brand-green/15 border border-brand-green/30 flex items-center justify-center text-brand-accent text-2xl sm:text-3xl shears-icon shadow-xl">
                     <i class="ph ph-scissors"></i>
                 </div>
             </div>
 
-            <!-- Error Code & Header -->
-            <div class="text-[10px] uppercase tracking-[0.25em] text-brand-accent mb-3 fade-up delay-1 font-bold">Atelier Error 404</div>
+            <!-- Error Code & Category -->
+            <div class="text-[10px] sm:text-xs uppercase tracking-[0.25em] text-brand-accent mb-3 fade-up delay-1 font-bold">
+                Atelier Error 404 &bull; Page Not Found
+            </div>
 
-            <h1 class="font-serif text-4xl sm:text-6xl text-brand-light leading-tight mb-4 fade-up delay-1">
+            <!-- Main Heading -->
+            <h1 class="font-serif text-3xl sm:text-5xl md:text-6xl text-brand-light leading-tight mb-4 fade-up delay-1">
                 A Style That <br>
                 <span class="italic text-brand-accent font-light">Doesn't Exist</span>
             </h1>
 
-            <!-- Subtitle -->
-            <p class="text-sm sm:text-base text-brand-light/70 font-light leading-relaxed mb-8 fade-up delay-2 max-w-lg">
-                The treatment, article, or archive you are looking for has been moved, reformulated, or relocated. Let us guide you back to our salon sanctuary.
+            <!-- Explanatory Subtitle -->
+            <p class="text-xs sm:text-sm md:text-base text-brand-light/70 font-light leading-relaxed mb-8 fade-up delay-2 max-w-md mx-auto">
+                The treatment, journal story, or archive you are looking for has been moved, reformulated, or relocated. Let us guide you back to our salon sanctuary.
             </p>
 
-            <!-- Search Bar Simulation -->
-            <div class="w-full max-w-md mb-8 fade-up delay-2 relative">
-                <i class="ph ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-brand-muted text-lg"></i>
+            <!-- Search Bar -->
+            <div class="w-full max-w-md mb-8 fade-up delay-2 relative mx-auto">
+                <i class="ph ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-brand-muted text-base sm:text-lg"></i>
                 <input type="text" id="salon-search" onkeydown="if(event.key==='Enter') handleSearch()" placeholder="Search haircuts, balayage, scalp therapy..." class="salon-search-input">
-                <button type="button" onclick="handleSearch()" class="absolute right-2.5 top-1/2 -translate-y-1/2 px-3 py-1 bg-brand-green text-brand-light text-xs rounded-full hover:bg-[#3e4636] transition-colors border-none cursor-pointer">
+                <button type="button" onclick="handleSearch()" class="absolute right-2.5 top-1/2 -translate-y-1/2 px-3.5 py-1.5 bg-brand-green text-brand-light text-xs rounded-full hover:bg-[#3e4636] transition-colors border-none cursor-pointer font-medium">
                     Search
                 </button>
             </div>
 
-            <!-- Primary Navigation Links -->
-            <div class="flex flex-wrap gap-3 justify-center fade-up delay-3 mb-12">
+            <!-- Primary Navigation Quick Links -->
+            <div class="flex flex-wrap gap-2.5 sm:gap-3.5 justify-center fade-up delay-3 w-full">
                 <a href="index.html" class="quick-link quick-link-primary">
                     <i class="ph-fill ph-house text-sm"></i> Return to Studio
                 </a>
                 <a href="services.html" class="quick-link">
-                    <i class="ph-fill ph-scissors text-sm"></i> Treatment Menu
+                    <i class="ph-fill ph-scissors text-sm"></i> Treatments
                 </a>
                 <a href="blog.html" class="quick-link">
-                    <i class="ph-fill ph-book-open text-sm"></i> Read Journal
+                    <i class="ph-fill ph-book-open text-sm"></i> Journal
+                </a>
+                <a href="contact.html" class="quick-link">
+                    <i class="ph-fill ph-map-pin text-sm"></i> Contact
                 </a>
                 <a href="login.html" class="quick-link">
-                    <i class="ph-fill ph-calendar text-sm"></i> Client Portal
+                    <i class="ph-fill ph-user text-sm"></i> Client Portal
                 </a>
             </div>
 
-            <!-- Curated Treatments Showcase Cards -->
-            <div class="w-full text-left fade-up delay-4">
-                <p class="text-[10px] text-brand-accent uppercase tracking-[0.25em] font-bold text-center mb-6">Or Discover Popular Salon Services</p>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="treatment-card cursor-pointer" onclick="window.location.href='services.html'">
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="font-serif text-lg text-brand-light">The Signature Cut</h3>
-                            <span class="text-xs font-semibold text-brand-accent">From ₹2,500</span>
-                        </div>
-                        <p class="text-xs text-brand-muted leading-relaxed">Comprehensive architectural analysis, purifying wash, precision cut, and bespoke blowout.</p>
-                    </div>
-
-                    <div class="treatment-card cursor-pointer" onclick="window.location.href='services.html'">
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="font-serif text-lg text-brand-light">Bespoke Balayage</h3>
-                            <span class="text-xs font-semibold text-brand-accent">From ₹6,500</span>
-                        </div>
-                        <p class="text-xs text-brand-muted leading-relaxed">Hand-painted multi-dimensional highlights tailored to bone structure with bond-building shield.</p>
-                    </div>
-
-                    <div class="treatment-card cursor-pointer" onclick="window.location.href='services.html'">
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="font-serif text-lg text-brand-light">Scalp Detoxification</h3>
-                            <span class="text-xs font-semibold text-brand-accent">From ₹1,800</span>
-                        </div>
-                        <p class="text-xs text-brand-muted leading-relaxed">Micro-exfoliating scrub, cellular massage ritual, and botanical steam infusion.</p>
-                    </div>
-
-                    <div class="treatment-card cursor-pointer" onclick="window.location.href='services.html'">
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="font-serif text-lg text-brand-light">The Complete Canvas</h3>
-                            <span class="text-xs font-semibold text-brand-accent">₹9,500</span>
-                        </div>
-                        <p class="text-xs text-brand-muted leading-relaxed">4.5-hour transformative experience: Restyle cut, full color dimensional art, and bond repair.</p>
-                    </div>
-                </div>
-            </div>
-
         </div>
+
+        <!-- Clean Minimalist Footer Stamp -->
+        <div class="w-full text-center fade-up delay-4 shrink-0 pb-2">
+            <p class="text-[10px] uppercase tracking-widest text-brand-light/40">
+                &copy; 2026 Stackly Aesthetics &bull; Salem, Tamil Nadu &bull; +91 987 654 3210
+            </p>
+        </div>
+
     </main>
 
-    <!-- Luxury Salon Ticker -->
-    <div class="overflow-hidden border-t border-brand-light/10 py-3.5 bg-[#101010]">
-        <div class="ticker-move text-[10px] uppercase tracking-[0.25em] text-brand-accent/70">
-            <span>STACKLY AESTHETICS &bull; BESPOKE HAIR ARTISTRY &bull; SALEM, TAMIL NADU &bull; STRUCTURAL CUTTING &bull; CLEAN BOTANICAL FORMULATIONS &bull; MASTER ARTISANS &bull; PHONE: +91 987 654 3210 &bull; MON-SUN: 9AM–8PM &bull;&nbsp;&nbsp;</span>
-            <span>STACKLY AESTHETICS &bull; BESPOKE HAIR ARTISTRY &bull; SALEM, TAMIL NADU &bull; STRUCTURAL CUTTING &bull; CLEAN BOTANICAL FORMULATIONS &bull; MASTER ARTISANS &bull; PHONE: +91 987 654 3210 &bull; MON-SUN: 9AM–8PM &bull;&nbsp;&nbsp;</span>
-        </div>
-    </div>
-
-    <!-- FOOTER -->
-    <footer class="bg-brand-green text-brand-light px-6 md:px-12 py-12 border-t border-brand-light/15">
-        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
-            <div class="md:col-span-1">
-                <a href="index.html" class="inline-block mb-4 hover:opacity-80 transition-opacity" title="Stackly Home">
-                    <img src="images/stackly logo.webp" alt="Stackly Aesthetics" class="h-9 w-auto object-contain">
-                </a>
-                <p class="text-xs text-brand-light/70 leading-relaxed mb-4">Salem's destination for bespoke hair design, bond integrity, and personalized aesthetic care.</p>
-                <div class="flex gap-3 text-lg text-brand-light/80">
-                    <a href="404.html" class="hover:text-white transition-colors"><i class="ph-fill ph-instagram-logo"></i></a>
-                    <a href="404.html" class="hover:text-white transition-colors"><i class="ph-fill ph-pinterest-logo"></i></a>
-                    <a href="404.html" class="hover:text-white transition-colors"><i class="ph-fill ph-facebook-logo"></i></a>
-                </div>
-            </div>
-
-            <div>
-                <h4 class="font-serif text-lg mb-4 text-brand-light">The Studio</h4>
-                <ul class="space-y-2.5 text-xs text-brand-light/70">
-                    <li><a href="index.html" class="hover:text-white transition-colors">Home Page</a></li>
-                    <li><a href="about.html" class="hover:text-white transition-colors">Our Philosophy</a></li>
-                    <li><a href="services.html" class="hover:text-white transition-colors">Treatment Menu</a></li>
-                    <li><a href="blog.html" class="hover:text-white transition-colors">The Style Chronicles</a></li>
-                </ul>
-            </div>
-
-            <div>
-                <h4 class="font-serif text-lg mb-4 text-brand-light">Atelier Portal</h4>
-                <ul class="space-y-2.5 text-xs text-brand-light/70">
-                    <li><a href="login.html" class="hover:text-white transition-colors">Client Sign In</a></li>
-                    <li><a href="signup.html" class="hover:text-white transition-colors">Join Atelier Club</a></li>
-                    <li><a href="user dashboard.html" class="hover:text-white transition-colors">My Appointments</a></li>
-                    <li><a href="login.html" class="hover:text-white transition-colors">Staff & Stylist Portal</a></li>
-                </ul>
-            </div>
-
-            <div>
-                <h4 class="font-serif text-lg mb-4 text-brand-light">Contact Salem</h4>
-                <p class="text-xs text-brand-light/70 leading-relaxed mb-2">MMR Complex, Periyakollappatty, Chinna Thirupathi, Salem, Tamil Nadu 636008</p>
-                <p class="text-xs text-brand-light/70 leading-relaxed mb-2"><a href="404.html" class="hover:underline">+91 987 654 3210</a></p>
-                <p class="text-xs text-brand-light/70 leading-relaxed"><a href="404.html" class="hover:underline">hello@stackly.in</a></p>
-            </div>
-        </div>
-
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center pt-8 mt-8 border-t border-brand-light/10 text-[10px] text-brand-light/60 uppercase tracking-widest gap-3">
-            <p>&copy; 2026 STACKLY AESTHETICS. ALL RIGHTS RESERVED.</p>
-            <div class="flex gap-4">
-                <a href="404.html" class="hover:text-white">Etiquette & Terms</a>
-                <a href="404.html" class="hover:text-white">Privacy Policy</a>
-                <a href="404.html" class="hover:text-white">Return to Top</a>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Script logic -->
-    <script src="validation.js"></script>
+    <!-- Search Handler Script -->
     <script>
-        const mobileBtn = document.getElementById('mobile-menu-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const mobileClose = document.getElementById('mobile-close-btn');
-
-        function openMenu() {
-            mobileMenu.classList.remove('opacity-0', 'pointer-events-none');
-            mobileMenu.classList.add('opacity-100');
-        }
-        function closeMenu() {
-            mobileMenu.classList.add('opacity-0', 'pointer-events-none');
-            mobileMenu.classList.remove('opacity-100');
-        }
-
-        mobileBtn.addEventListener('click', openMenu);
-        mobileClose.addEventListener('click', closeMenu);
-        mobileMenu.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
-
         function handleSearch() {
             const query = document.getElementById('salon-search').value.trim();
             if (query) {
